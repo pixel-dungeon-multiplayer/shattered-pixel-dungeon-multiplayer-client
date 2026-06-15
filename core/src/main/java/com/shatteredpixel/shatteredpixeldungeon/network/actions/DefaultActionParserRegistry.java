@@ -116,8 +116,6 @@ public class DefaultActionParserRegistry {
         register(registry, "cell_listener_prompt", 1, new CellListenerPromptParser());
         register(registry, "attack_indicator_target", 1, new AttackIndicatorTargetParser());
         register(registry, "resume_button_visible", 1, new ResumeButtonVisibleParser());
-        register(registry, "show_message", 1, new ShowMessageParser());
-        register(registry, "window", 1, new WindowParser()); // Legacy
         register(registry, "plant_update", 1, new PlantUpdateParser());
         register(registry, "plant_remove", 1, new PlantRemoveParser());
         register(registry, "trap_update", 1, new TrapUpdateParser());
@@ -245,12 +243,6 @@ public class DefaultActionParserRegistry {
 
     public static JSONArray payloadArray(JSONObject action) throws JSONException {
         return action.getJSONArray("payload");
-    }
-
-    private static class WindowParser implements ActionParser {
-        public void parse(ParseThread parseThread, JSONObject action) throws JSONException {
-            parseThread.parseWindow(payloadObject(action));
-        }
     }
 
 }
