@@ -109,6 +109,16 @@ public class NetworkPacket {
             dataRef.get().put("toolbar_action", obj);
         }
     }
+
+    public void packAndAddExamineAction(int cell) {
+        JSONObject obj = new JSONObject();
+        obj.put("action_name", "examine");
+        obj.put("cell", cell);
+        synchronized (dataRef) {
+            dataRef.get().put("toolbar_action", obj);
+        }
+    }
+
     public void packAndAddTalentUpgrade(Talent talent) {
         synchronized (dataRef) {
             dataRef.get().put("talent_upgrade", talent.name());

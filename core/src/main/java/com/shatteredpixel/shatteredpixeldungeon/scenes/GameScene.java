@@ -40,6 +40,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.network.ParseThread;
+import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.DiscardedItemSprite;
@@ -1516,6 +1517,9 @@ public class GameScene extends PixelScene {
 			return;
 		}
 
+		SendData.sendExamineActions(cell);
+		if (true) return;
+
 		ArrayList<Object> objects = getObjectsAtCell(cell);
 
 		if (objects.isEmpty()) {
@@ -1761,6 +1765,10 @@ public class GameScene extends PixelScene {
 					if (index == 0){
 						handleCell(cell);
 					} else {
+						if (true) {
+							SendData.sendExamineActions(cell);
+							return;
+						}
 						if (objects.size() == 0){
 							GameScene.show(new WndInfoCell(cell));
 						} else {

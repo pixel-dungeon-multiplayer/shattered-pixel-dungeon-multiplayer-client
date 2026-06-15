@@ -76,6 +76,11 @@ public class SendData {
         sendToolbarAction("SEARCH");
     }
 
+    public static void sendExamineActions(int cell) {
+        packet.packAndAddExamineAction(cell);
+        flush();
+    }
+
     public static void sendTalentUpgrade(Talent talent) {
         packet.packAndAddTalentUpgrade(talent);
         flush();
