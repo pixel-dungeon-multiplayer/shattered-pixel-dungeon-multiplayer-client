@@ -49,6 +49,10 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.GameLog;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.utils.Log;
 import com.shatteredpixel.shatteredpixeldungeon.windows.*;
+import com.shatteredpixel.shatteredpixeldungeon.windows.legacy.WndChooseSubclass;
+import com.shatteredpixel.shatteredpixeldungeon.windows.legacy.WndQuest;
+import com.shatteredpixel.shatteredpixeldungeon.windows.legacy.WndTradeItem;
+import com.shatteredpixel.shatteredpixeldungeon.windows.legacy.WndWandmaker;
 import com.watabou.noosa.Camera;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.Group;
@@ -578,9 +582,6 @@ public class ParseThread implements Callable<String> {
                 }
                 case "info_cell":
                     GameScene.show(new WndInfoCell(windowObj.getJSONObject("args")));
-                    break;
-                case "cleric_spells":
-                    GameScene.show(new WndClericSpells(id, windowObj.getJSONObject("args")));
                     break;
                 case "quest":
                     GameScene.show(new WndQuest(id, windowObj.getJSONObject("args")));

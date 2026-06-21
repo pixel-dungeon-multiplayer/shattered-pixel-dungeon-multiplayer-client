@@ -19,21 +19,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-package com.shatteredpixel.shatteredpixeldungeon.windows;
+package com.shatteredpixel.shatteredpixeldungeon.windows.legacy;
 
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
 import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
 import com.watabou.utils.Reflection;
 import org.json.JSONObject;
 
 public class WndQuest extends WndTitledMessage {
 
-	public WndQuest( NPC questgiver, String text ) {
-		super( questgiver.sprite(), Messages.titleCase( questgiver.name() ), text );
-	}
 	public WndQuest(int id, JSONObject object) {
 		super((CharSprite) Reflection.newInstance(Reflection.forName(JsonStringHelper.getString(object, "sprite_name"))), Messages.titleCase(JsonStringHelper.getString(object, "char_name")), JsonStringHelper.getString(object, "text"));
 		this.setId(id);
