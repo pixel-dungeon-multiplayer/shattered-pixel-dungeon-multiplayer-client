@@ -28,7 +28,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MobSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
@@ -38,24 +37,6 @@ import com.watabou.utils.Random;
 public class PowerOfMany extends ArmorAbility {
 
 	protected float baseChargeUse = 35;
-
-	@Override
-	public String targetingPrompt() {
-        Char ally = getPoweredAlly();
-
-        boolean allyExists = ally != null;
-
-
-        if (!allyExists) {
-            return Messages.get(this, "prompt_default");
-        } else {
-            return null;
-        }
-    }
-
-	public boolean useTargeting(){
-		return false;
-	}
 
 	@Override
 	public int icon() {

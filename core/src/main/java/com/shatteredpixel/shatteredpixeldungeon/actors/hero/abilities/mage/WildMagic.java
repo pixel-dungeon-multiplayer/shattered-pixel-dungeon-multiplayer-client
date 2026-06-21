@@ -29,7 +29,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbili
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.tweeners.Delayer;
@@ -44,11 +43,6 @@ public class WildMagic extends ArmorAbility {
 
 	{
 		baseChargeUse = 25f;
-	}
-
-	@Override
-	public String targetingPrompt() {
-		return Messages.get(this, "prompt");
 	}
 
 

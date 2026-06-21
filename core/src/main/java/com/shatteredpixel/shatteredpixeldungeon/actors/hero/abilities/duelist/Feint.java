@@ -21,10 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist;
 
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 
 public class Feint extends ArmorAbility {
@@ -38,20 +36,6 @@ public class Feint extends ArmorAbility {
 	@Override
 	public int icon() {
 		return HeroIcon.FEINT;
-	}
-
-	public boolean useTargeting(){
-		return false;
-	}
-
-	@Override
-	public String targetingPrompt() {
-		return Messages.get(this, "prompt");
-	}
-
-	@Override
-	public int targetedPos(Char user, int dst) {
-		return dst;
 	}
 
 	@Override

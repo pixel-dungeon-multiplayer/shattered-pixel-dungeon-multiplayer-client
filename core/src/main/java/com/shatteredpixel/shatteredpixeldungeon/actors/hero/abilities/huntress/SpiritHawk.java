@@ -34,12 +34,6 @@ public class SpiritHawk extends ArmorAbility {
 
 
 	@Override
-	public boolean useTargeting(){
-		return false;
-	}
-
-
-	@Override
 	public int icon() {
 		return HeroIcon.SPIRIT_HAWK;
 	}

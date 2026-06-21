@@ -21,11 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 
 public class WarpBeacon extends ArmorAbility {
@@ -34,19 +31,6 @@ public class WarpBeacon extends ArmorAbility {
 
 	{
 		baseChargeUse = 35f;
-	}
-
-	@Override
-	public String targetingPrompt() {
-        if (Dungeon.hero.hasTalent(Talent.REMOTE_BEACON)) {
-            return Messages.get(this, "prompt");
-        }
-		return super.targetingPrompt();
-	}
-
-	@Override
-	public int targetedPos(Char user, int dst) {
-		return dst;
 	}
 
 	@Override

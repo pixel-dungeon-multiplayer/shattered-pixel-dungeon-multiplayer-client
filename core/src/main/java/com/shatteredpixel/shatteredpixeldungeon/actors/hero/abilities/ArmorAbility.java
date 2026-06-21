@@ -21,28 +21,13 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities;
 
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
 
-public abstract class ArmorAbility implements Bundlable {
-
-	//leave null for no targeting
-	public String targetingPrompt(){
-		return null;
-	}
-
-	public boolean useTargeting(){
-		return targetingPrompt() != null;
-	}
-
-	public int targetedPos( Char user, int dst ){
-		return new Ballistica( user.pos, dst, Ballistica.PROJECTILE ).collisionPos;
-	}
+public abstract class ArmorAbility {
 
 	public String name(){
 		return Messages.get(this, "name");
@@ -62,11 +47,4 @@ public abstract class ArmorAbility implements Bundlable {
 
 	public abstract Talent[] talents();
 
-	@Override
-	public void storeInBundle(Bundle bundle) {
-	}
-
-	@Override
-	public void restoreFromBundle(Bundle bundle) {
-	}
 }

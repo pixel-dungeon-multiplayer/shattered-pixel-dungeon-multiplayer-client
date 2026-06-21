@@ -21,9 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities;
 
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 
 public class Ratmogrify extends ArmorAbility {
@@ -36,16 +34,6 @@ public class Ratmogrify extends ArmorAbility {
 
 	//this is sort of hacky, but we need it to know when to use alternate name/icon for heroic energy
 	public static boolean useRatroicEnergy = false;
-
-	@Override
-	public String targetingPrompt() {
-		return Messages.get(this, "prompt");
-	}
-
-	@Override
-	public int targetedPos(Char user, int dst) {
-		return dst;
-	}
 
 	@Override
 	public int icon() {

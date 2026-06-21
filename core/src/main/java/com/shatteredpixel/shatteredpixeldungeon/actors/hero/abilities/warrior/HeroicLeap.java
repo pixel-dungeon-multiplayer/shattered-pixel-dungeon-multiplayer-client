@@ -23,7 +23,6 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 
 public class HeroicLeap extends ArmorAbility {
@@ -34,12 +33,7 @@ public class HeroicLeap extends ArmorAbility {
 		baseChargeUse = 35f;
 	}
 
-	@Override
-	public String targetingPrompt() {
-		return Messages.get(this, "prompt");
-	}
-
-	@Override
+    @Override
 	public int icon() {
 		return HeroIcon.HEROIC_LEAP;
 	}
