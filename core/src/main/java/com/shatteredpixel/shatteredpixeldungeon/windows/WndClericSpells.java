@@ -22,13 +22,8 @@
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.ClericSpell;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.GuidingLight;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HolyTome;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
 import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
@@ -39,17 +34,11 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
-import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
-import com.shatteredpixel.shatteredpixeldungeon.ui.RightClickMenu;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.watabou.input.PointerEvent;
 import com.watabou.noosa.ColorBlock;
-import com.watabou.noosa.Image;
 import com.watabou.noosa.NinePatch;
 import com.watabou.utils.DeviceCompat;
-import com.watabou.utils.PointF;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -129,81 +118,11 @@ public class WndClericSpells extends Window {
 		}
 
 	}
-	public WndClericSpells(HolyTome tome, Hero cleric, boolean info){
-
-		if (!info){
-			title = new IconTitle(new ItemSprite(tome), Messages.titleCase(Messages.get(this, "cast_title")));
-		} else {
-			title = new IconTitle(Icons.INFO.get(), Messages.titleCase(Messages.get(this, "info_title")));
-		}
-
-		title.setRect(0, 0, WIDTH, 0);
-		add(title);
-
-		IconButton btnInfo = new IconButton(info ? new ItemSprite(tome) : Icons.INFO.get()){
-			@Override
-			protected void onClick() {
-				GameScene.show(new WndClericSpells(tome, cleric, !info));
-				hide();
-			}
-		};
-		btnInfo.setRect(WIDTH-16, 0, 16, 16);
-		add(btnInfo);
-
-		RenderedTextBlock msg;
-		if (info){
-			msg = PixelScene.renderTextBlock( Messages.get( this, "info_desc"), 6);
-		} else if (DeviceCompat.isDesktop()){
-			msg = PixelScene.renderTextBlock( Messages.get( this, "cast_desc_desktop"), 6);
-		} else {
-			msg = PixelScene.renderTextBlock( Messages.get( this, "cast_desc_mobile"), 6);
-		}
-		msg.maxWidth(WIDTH);
-		msg.setPos(0, title.bottom()+4);
-		add(msg);
-
-		int top = (int)msg.bottom()+4;
-
-		for (int i = 1; i <= Talent.MAX_TALENT_TIERS; i++) {
-
-			ArrayList<ClericSpell> spells = ClericSpell.getSpellList(cleric, i);
-
-			if (!spells.isEmpty() && i != 1){
-				top += BTN_SIZE + 2;
-				ColorBlock sep = new ColorBlock(WIDTH, 1, 0xFF000000);
-				sep.y = top;
-				add(sep);
-				top += 3;
-			}
-
-
-			for (ClericSpell spell : spells) {
-				IconButton spellBtn = new SpellButton(spell, tome, info);
-				add(spellBtn);
-				spellBtns.add(spellBtn);
-			}
-
-			int left = 2 + (WIDTH - spellBtns.size() * (BTN_SIZE + 4)) / 2;
-			for (IconButton btn : spellBtns) {
-				btn.setRect(left, top, BTN_SIZE, BTN_SIZE);
-				left += btn.width() + 4;
-			}
-
-		}
-
-		resize(WIDTH, top + BTN_SIZE);
-
-		//if we are on mobile, offset the window down to just above the toolbar
-		if (SPDSettings.interfaceSize() != 2){
-			offset(0, (int) (GameScene.uiCamera.height/2 - 30 - height/2));
-		}
-
-	}
 
 	public class SpellButton extends IconButton {
 
-		ClericSpell spell;
-		HolyTome tome;
+//		ClericSpell spell;
+//		HolyTome tome;
 		boolean info;
 
 		NinePatch bg;
@@ -211,17 +130,7 @@ public class WndClericSpells extends Window {
 		String spellName;
 		String spellShortDesc;
 		public SpellButton(JSONObject object) {
-			super(new HeroIcon(new ClericSpell() {
-				@Override
-				public void onCast(HolyTome tome, Hero hero) {
-
-				}
-
-				@Override
-				public int icon() {
-				return 	object.getInt("icon");
-				}
-			}));
+			super(new HeroIcon(object.getInt("icon")));
 			info = object.getBoolean("info");
 			icon.alpha((float) object.getDouble("alpha"));
 			spellName = JsonStringHelper.getString(object, "spell_name");
@@ -230,40 +139,25 @@ public class WndClericSpells extends Window {
 			bg = Chrome.get(Chrome.Type.TOAST);
 			addToBack(bg);
 		}
-		public SpellButton(ClericSpell spell, HolyTome tome, boolean info){
-			super(new HeroIcon(spell));
-
-			this.spell = spell;
-			this.tome = tome;
-			this.info = info;
-			if (!tome.canCast(Dungeon.hero, spell)){
-				icon.alpha( 0.3f );
-			} else if (spell == GuidingLight.INSTANCE && spell.chargeUse(Dungeon.hero) == 0){
-				icon.brightness(3);
-			}
-
-			bg = Chrome.get(Chrome.Type.TOAST);
-			addToBack(bg);
-		}
 
 		@Override
 		protected void onPointerDown() {
-			super.onPointerDown();
-			if (spell == GuidingLight.INSTANCE && spell.chargeUse(Dungeon.hero) == 0){
-				icon.brightness(4);
-			}
+//			super.onPointerDown();
+//			if (spell == GuidingLight.INSTANCE && spell.chargeUse(Dungeon.hero) == 0){
+//				icon.brightness(4);
+//			}
 		}
 
 		@Override
 		protected void onPointerUp() {
 			super.onPointerUp();
-			if (tome != null) {
-				if (!tome.canCast(Dungeon.hero, spell)) {
-					icon.alpha(0.3f);
-			} else if (spell == GuidingLight.INSTANCE && spell.chargeUse(Dungeon.hero) == 0){
-				icon.brightness(3);
-				}
-			}
+//			if (tome != null) {
+//				if (!tome.canCast(Dungeon.hero, spell)) {
+//					icon.alpha(0.3f);
+//			} else if (spell == GuidingLight.INSTANCE && spell.chargeUse(Dungeon.hero) == 0){
+//				icon.brightness(3);
+//				}
+//			}
 		}
 
 		@Override

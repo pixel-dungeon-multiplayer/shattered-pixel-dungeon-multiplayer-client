@@ -23,13 +23,9 @@ package com.shatteredpixel.shatteredpixeldungeon.items.artifacts;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.ClericSpell;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 
 public class HolyTome extends Artifact {
@@ -51,24 +47,10 @@ public class HolyTome extends Artifact {
 
 	public static final String AC_CAST = "CAST";
 
-	//used to ensure tome has variable targeting logic for whatever spell is being case
-	public ClericSpell targetingSpell = null;
-
 	@Override
 	public int targetingPos(Hero user, int dst) {
-		if (targetingSpell == null || targetingSpell.targetingFlags() == -1) {
-			return super.targetingPos(user, dst);
-		} else {
-			return new Ballistica( user.pos, dst, targetingSpell.targetingFlags() ).collisionPos;
-		}
-	}
-
-	public boolean canCast( Hero hero, ClericSpell spell ){
-        if ((!isEquipped(hero) && (!Dungeon.hero.hasTalent(Talent.LIGHT_READING) || !hero.belongings.contains(this))))
-            return false;
-        return charge >= spell.chargeUse(hero)
-                && spell.canCast(hero);
-	}
+        return super.targetingPos(user, dst);
+    }
 
 	public void spendCharge( float chargesSpent ){
 		partialCharge -= chargesSpent;
@@ -120,22 +102,6 @@ public class HolyTome extends Artifact {
 	public Item upgrade() {
 		chargeCap = Math.min(chargeCap + 1, 10);
 		return super.upgrade();
-	}
-
-	private ClericSpell quickSpell = null;
-
-	public void setQuickSpell(ClericSpell spell){
-		if (quickSpell == spell){
-			quickSpell = null; //re-assigning the same spell clears the quick spell
-			if (passiveBuff != null){
-				ActionIndicator.clearAction((ActionIndicator.Action) passiveBuff);
-			}
-		} else {
-			quickSpell = spell;
-			if (passiveBuff != null){
-				ActionIndicator.setAction((ActionIndicator.Action) passiveBuff);
-			}
-		}
 	}
 
 	private static final String QUICK_CLS = "quick_cls";

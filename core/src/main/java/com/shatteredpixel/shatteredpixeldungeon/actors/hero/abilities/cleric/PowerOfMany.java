@@ -26,7 +26,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Stasis;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -46,13 +45,8 @@ public class PowerOfMany extends ArmorAbility {
 
         boolean allyExists = ally != null;
 
-        if (Stasis.getStasisAlly() != null) {
-            allyExists = true;
-        }
 
-        if (false) {
-            return Messages.get(this, "prompt_ally");
-        } else if (!allyExists) {
+        if (!allyExists) {
             return Messages.get(this, "prompt_default");
         } else {
             return null;
