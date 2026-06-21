@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfMetamorphosis;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoTalent;
@@ -49,6 +50,8 @@ public class TalentButton extends Button {
 	Talent talent;
 	int pointsInTalent;
 	Mode mode;
+	private final int networkWindowId;
+	private final int networkButtonIndex;
 
 	TalentIcon icon;
 	Image bg;
@@ -63,6 +66,10 @@ public class TalentButton extends Button {
 	}
 
 	public TalentButton(int tier, Talent talent, int points, Mode mode){
+		this(tier, talent, points, mode, -1, -1);
+	}
+
+	public TalentButton(int tier, Talent talent, int points, Mode mode, int networkWindowId, int networkButtonIndex){
 		super();
 		hotArea.blockLevel = PointerArea.NEVER_BLOCK;
 
@@ -70,6 +77,8 @@ public class TalentButton extends Button {
 		this.talent = talent;
 		this.pointsInTalent = points;
 		this.mode = mode;
+		this.networkWindowId = networkWindowId;
+		this.networkButtonIndex = networkButtonIndex;
 
 		bg.frame(20*(talent.maxPoints()-1), 0, WIDTH, HEIGHT);
 
@@ -111,6 +120,16 @@ public class TalentButton extends Button {
 	protected void onClick() {
 		super.onClick();
 
+		if (networkWindowId >= 0) {
+			SendData.sendWindowResult(networkWindowId, networkButtonIndex);
+			if (mode == Mode.METAMORPH_CHOOSE && ScrollOfMetamorphosis.WndMetamorphChoose.INSTANCE != null) {
+				ScrollOfMetamorphosis.WndMetamorphChoose.INSTANCE.hide();
+			} else if (mode == Mode.METAMORPH_REPLACE && ScrollOfMetamorphosis.WndMetamorphReplace.INSTANCE != null) {
+				ScrollOfMetamorphosis.WndMetamorphReplace.INSTANCE.hide();
+			}
+			return;
+		}
+
 		Window toAdd;
 		if (mode == Mode.UPGRADE
 				&& Dungeon.hero != null
@@ -148,7 +167,6 @@ public class TalentButton extends Button {
 					if (ScrollOfMetamorphosis.WndMetamorphChoose.INSTANCE != null){
 						ScrollOfMetamorphosis.WndMetamorphChoose.INSTANCE.hide();
 					}
-					GameScene.show(new ScrollOfMetamorphosis.WndMetamorphReplace(talent, tier));
 				}
 			});
 		} else if (mode == Mode.METAMORPH_REPLACE && Dungeon.hero != null && Dungeon.hero.isAlive()) {

@@ -121,6 +121,35 @@ public class TalentsPane extends ScrollPane {
 		}
 	}
 
+	public TalentsPane(TalentButton.Mode mode, ArrayList<LinkedHashMap<Talent, Integer>> talents, int networkWindowId) {
+		super(new Component());
+
+		int networkButtonIndex = 0;
+		for (int i = 0; i < talents.size(); i++){
+			if (talents.get(i).isEmpty()) continue;
+
+			TalentTierPane pane = new TalentTierPane(talents.get(i), i+1, mode, networkWindowId, networkButtonIndex);
+			networkButtonIndex += talents.get(i).size();
+			panes.add(pane);
+			content.add(pane);
+
+			ColorBlock sep = new ColorBlock(0, 1, 0xFF000000);
+			separators.add(sep);
+			content.add(sep);
+		}
+
+		sep = new ColorBlock(0, 1, 0xFF000000);
+		content.add(sep);
+
+		blocker = new ColorBlock(0, 0, 0xFF222222);
+		content.add(blocker);
+		blockText = null;
+
+		for (int i = panes.size()-1; i >= 0; i--){
+			content.bringToFront(panes.get(i));
+		}
+	}
+
 	@Override
 	protected void layout() {
 		super.layout();
@@ -245,6 +274,24 @@ public class TalentsPane extends ScrollPane {
 				add(btn);
 			}
 
+		}
+
+		public TalentTierPane(LinkedHashMap<Talent, Integer> talents, int tier, TalentButton.Mode mode, int networkWindowId, int firstNetworkButtonIndex){
+			super();
+
+			this.tier = tier;
+
+			title = PixelScene.renderTextBlock(Messages.titleCase(Messages.get(TalentsPane.class, "tier", tier)), 9);
+			title.hardlight(Window.TITLE_COLOR);
+			add(title);
+
+			buttons = new ArrayList<>();
+			int index = firstNetworkButtonIndex;
+			for (Talent talent : talents.keySet()){
+				TalentButton btn = new TalentButton(tier, talent, talents.get(talent), mode, networkWindowId, index++);
+				buttons.add(btn);
+				add(btn);
+			}
 		}
 
 		private void setupStars(){

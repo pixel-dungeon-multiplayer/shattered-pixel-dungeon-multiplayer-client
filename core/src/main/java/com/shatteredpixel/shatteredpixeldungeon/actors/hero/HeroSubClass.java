@@ -65,21 +65,8 @@ public enum HeroSubClass {
 
 	public String desc() {
 		//Include the staff effect description in the battlemage's desc if possible
-		if (this == BATTLEMAGE){
-			String desc = Messages.get(this, name() + "_desc");
-			if (Game.scene() instanceof GameScene){
-
-                MagesStaff staff = null;
-				if (staff != null && staff.wandClass() != null){
-					desc += "\n\n" + Messages.get(staff.wandClass(), "bmage_desc");
-					desc = desc.replaceAll("_", "");
-				}
-			}
-			return desc;
-		} else {
-			return Messages.get(this, name() + "_desc");
-		}
-	}
+        return Messages.get(this, name() + "_desc");
+    }
 
 	public int icon(){
 		return icon;

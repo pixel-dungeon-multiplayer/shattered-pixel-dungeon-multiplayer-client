@@ -41,18 +41,8 @@ public class ElementalBlast extends ArmorAbility {
 	@Override
 	public String desc() {
 		String desc = Messages.get(this, "desc");
-		if (Game.scene() instanceof GameScene){
-
-            MagesStaff staff = null;
-			if (staff != null && staff.wandClass() != null){
-				desc += "\n\n" + Messages.get(staff.wandClass(), "eleblast_desc");
-			} else {
-				desc += "\n\n" + Messages.get(this, "generic_desc");
-			}
-		} else {
-			desc += "\n\n" + Messages.get(this, "generic_desc");
-		}
-		desc += "\n\n" + Messages.get(this, "cost", (int)baseChargeUse);
+        desc += "\n\n" + Messages.get(this, "generic_desc");
+        desc += "\n\n" + Messages.get(this, "cost", (int)baseChargeUse);
 		return desc;
 	}
 

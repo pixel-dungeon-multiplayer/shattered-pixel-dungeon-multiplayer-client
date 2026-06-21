@@ -28,7 +28,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.Trinity;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.HolyTome;
-import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.WondrousResin;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -137,9 +136,8 @@ public class MindForm extends ClericSpell {
 					wand.fx(shot, new Callback() {
 						public void call() {
 							wand.onZap(shot);
-							if (Random.Float() < WondrousResin.extraCurseEffectChance()){
-								WondrousResin.forcePositive = true;
-                                new Ballistica(Dungeon.hero.pos, cell, Ballistica.MAGIC_BOLT);
+                            if (Random.Float() < (float) 0){
+								new Ballistica(Dungeon.hero.pos, cell, Ballistica.MAGIC_BOLT);
 
                             }
 							wand.wandUsed();

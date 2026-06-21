@@ -236,16 +236,9 @@ public abstract class Wand extends Item {
 			availableUsesToID -= uses;
 			usesLeftToID -= uses;
 			if (usesLeftToID <= 0 || Dungeon.hero.pointsInTalent(Talent.SCHOLARS_INTUITION) == 2) {
-				if (ShardOfOblivion.passiveIDDisabled()){
-					if (usesLeftToID > -1){
-						GLog.p(Messages.get(ShardOfOblivion.class, "identify_ready"), name());
-					}
-					setIDReady();
-				} else {
-					GLog.p(Messages.get(Wand.class, "identify"));
+                GLog.p(Messages.get(Wand.class, "identify"));
 
-                }
-			}
+            }
         }
 
 		//inside staff

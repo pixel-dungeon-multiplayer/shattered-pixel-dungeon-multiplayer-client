@@ -21,172 +21,14 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
-import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.noosa.particles.PixelParticle;
 import com.watabou.utils.Random;
 
-public class MagesStaff extends MeleeWeapon {
+public class MagesStaff {
 
-	private Wand wand;
-
-	public static final String AC_IMBUE = "IMBUE";
-	public static final String AC_ZAP	= "ZAP";
-
-	private static final float STAFF_SCALE_FACTOR = 0.75f;
-
-	{
-		image = ItemSpriteSheet.MAGES_STAFF;
-		hitSound = Assets.Sounds.HIT;
-		hitSoundPitch = 1.1f;
-
-		tier = 1;
-
-		defaultAction = AC_ZAP;
-		usesTargeting = true;
-
-		unique = true;
-	}
-
-	public MagesStaff() {
-		wand = null;
-	}
-
-	@Override
-	public int max(int lvl) {
-		return  Math.round(3f*(tier+1)) +   //6 base damage, down from 10
-				lvl*(tier+1);               //scaling unaffected
-	}
-
-	public MagesStaff(Wand wand){
-		this();
-		wand.cursed = false;
-		this.wand = wand;
-		updateWand(false);
-		wand.curCharges = wand.maxCharges;
-	}
-
-	@Override
-	public String defaultAction() {
-		return AC_ZAP;
-	}
-
-	@Override
-	public int targetingPos(Hero user, int dst) {
-		if (wand != null) {
-			return wand.targetingPos(user, dst);
-		} else {
-			return super.targetingPos(user, dst);
-		}
-	}
-
-	@Override
-	public int buffedVisiblyUpgraded() {
-		if (wand != null){
-			return Math.max(super.buffedVisiblyUpgraded(), wand.buffedVisiblyUpgraded());
-		} else {
-			return super.buffedVisiblyUpgraded();
-		}
-	}
-
-	public Class<?extends Wand> wandClass(){
-		return wand != null ? wand.getClass() : null;
-	}
-
-	@Override
-	public Item upgrade(boolean enchant) {
-		super.upgrade( enchant );
-
-		updateWand(true);
-
-		return this;
-	}
-
-	@Override
-	public Item degrade() {
-		super.degrade();
-
-		updateWand(false);
-
-		return this;
-	}
-	
-	public void updateWand(boolean levelled){
-		if (wand != null) {
-			int curCharges = wand.curCharges;
-			wand.level(level());
-			//gives the wand one additional max charge
-			wand.maxCharges = Math.min(wand.maxCharges + 1, 10);
-			wand.curCharges = Math.min(curCharges + (levelled ? 1 : 0), wand.maxCharges);
-			updateQuickslot();
-		}
-	}
-
-	@Override
-	public String status() {
-		if (wand == null) return super.status();
-		else return wand.status();
-	}
-
-	@Override
-	public String name() {
-		if (wand == null) {
-			return super.name();
-		} else {
-			String name = Messages.get(wand, "staff_name");
-			return enchantment != null && (cursedKnown || !enchantment.curse()) ? enchantment.name( name ) : name;
-		}
-	}
-
-	@Override
-	public String info() {
-		String info = super.info();
-
-		if (wand != null){
-			info += "\n\n" + Messages.get(this, "has_wand", Messages.get(wand, "name"));
-			if ((!cursed && !hasCurseEnchant()) || !cursedKnown)    info += " " + wand.statsDesc();
-			else                                                    info += " " + Messages.get(this, "cursed_wand");
-
-			if (Dungeon.hero.subClass == HeroSubClass.BATTLEMAGE){
-				info += "\n\n" + Messages.get(wand, "bmage_desc");
-			}
-		}
-
-		return info;
-	}
-
-	@Override
-	public Emitter emitter() {
-		if (wand == null) return null;
-		Emitter emitter = new Emitter();
-		emitter.pos(12.5f, 3);
-		emitter.fillTarget = false;
-		emitter.pour(StaffParticleFactory, 0.1f);
-		return emitter;
-	}
-
-	@Override
-	public int value() {
-		return 0;
-	}
-	
-	@Override
-	public Weapon enchant(Enchantment ench) {
-		if (curseInfusionBonus && (ench == null || !ench.curse())){
-			curseInfusionBonus = false;
-			updateWand(false);
-		}
-		return super.enchant(ench);
-	}
-
+	@SuppressWarnings("unused")
 	private final Emitter.Factory StaffParticleFactory = new Emitter.Factory() {
 		@Override
 		//reimplementing this is needed as instance creation of new staff particles must be within this class.
@@ -202,11 +44,7 @@ public class MagesStaff extends MeleeWeapon {
 		@Override
 		//some particles need light mode, others don't
 		public boolean lightMode() { //todo check it
-			return !((false)
-					|| (false)
-					|| (false)
-					|| (false)
-					|| (false));
+			return true;
 		}
 	};
 
@@ -228,9 +66,6 @@ public class MagesStaff extends MeleeWeapon {
 
 			this.x = x;
 			this.y = y;
-
-			if (wand != null)
-				wand.staffFx( this );
 
 		}
 

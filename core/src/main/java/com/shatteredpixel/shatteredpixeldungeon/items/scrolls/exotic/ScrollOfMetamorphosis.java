@@ -22,34 +22,28 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Transmuting;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.InventoryScroll;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
-import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TalentButton;
-import com.shatteredpixel.shatteredpixeldungeon.ui.TalentIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TalentsPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.shatteredpixel.shatteredpixeldungeon.windows.IconTitle;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
-import com.watabou.utils.Random;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Set;
 
 public class ScrollOfMetamorphosis extends ExoticScroll {
 	
@@ -117,7 +111,13 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 			add(text);
 
 			top = text.bottom() + 2;
-			resize(120, (int)layoutTalentButtons(this, id, args.getJSONArray("tiers"), top));
+
+			pane = new TalentsPane(TalentButton.Mode.METAMORPH_CHOOSE, parseTalentTiers(args.getJSONArray("tiers")), id);
+			add(pane);
+			pane.setPos(0, top);
+			pane.setSize(120, pane.content().height());
+			resize((int)pane.width(), (int)pane.bottom());
+			pane.setPos(0, top);
 		}
 
 		public WndMetamorphChoose(){
@@ -199,70 +199,6 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 			setup(id, JsonStringHelper.getString(args, "message"), tier, replaceOptions);
 		}
 
-		//for window restoring
-		public WndMetamorphReplace(){
-			super();
-
-			if (INSTANCE != null){
-				replacing = INSTANCE.replacing;
-				tier = INSTANCE.tier;
-				replaceOptions = INSTANCE.replaceOptions;
-				INSTANCE = this;
-				setup(replacing, tier, replaceOptions);
-			} else {
-				hide();
-			}
-		}
-
-		public WndMetamorphReplace(Talent replacing, int tier){
-			super();
-
-			if (!identifiedByUse && false) {
-			}
-			identifiedByUse = false;
-
-			INSTANCE = this;
-
-			this.replacing = replacing;
-			this.tier = tier;
-
-			LinkedHashMap<Talent, Integer> options = new LinkedHashMap<>();
-			Set<Talent> curTalentsAtTier = Dungeon.hero.talents.get(tier-1).keySet();
-
-			for (HeroClass cls : HeroClass.values()){
-
-				ArrayList<LinkedHashMap<Talent, Integer>> clsTalents = new ArrayList<>();
-				Talent.initClassTalents(cls, clsTalents);
-
-				Set<Talent> clsTalentsAtTier = clsTalents.get(tier-1).keySet();
-				boolean replacingIsInSet = false;
-				for (Talent talent : clsTalentsAtTier.toArray(new Talent[0])){
-					if (talent == replacing){
-						replacingIsInSet = true;
-						break;
-					} else {
-						if (curTalentsAtTier.contains(talent)){
-							clsTalentsAtTier.remove(talent);
-						}
-					}
-				}
-				if (!replacingIsInSet && !clsTalentsAtTier.isEmpty()) {
-					options.put(Random.element(clsTalentsAtTier), Dungeon.hero.pointsInTalent(replacing));
-				}
-			}
-
-			replaceOptions = options;
-			setup(replacing, tier, options);
-		}
-
-		private void setup(Talent replacing, int tier, LinkedHashMap<Talent, Integer> replaceOptions){
-			setup(Messages.get(ScrollOfMetamorphosis.class, "replace_desc"), tier, replaceOptions);
-		}
-
-		private void setup(@NotNull String message, int tier, @NotNull LinkedHashMap<Talent, Integer> replaceOptions){
-			setup(-1, message, tier, replaceOptions);
-		}
-
 		private void setup(int id, @NotNull String message, int tier, @NotNull LinkedHashMap<Talent, Integer> replaceOptions){
 			float top = 0;
 
@@ -282,23 +218,14 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 
 			top = text.bottom() + 2;
 
-			if (id >= 0) {
-				JSONArray options = new JSONArray();
-				for (Talent talent : replaceOptions.keySet()) {
-					JSONObject option = new JSONObject();
-					option.put("id", talent.name());
-					option.put("points", replaceOptions.get(talent));
-					options.put(option);
-				}
-				resize(120, (int)layoutTalentButtons(this, id, options, top));
-			} else {
-				TalentsPane.TalentTierPane optionsPane = new TalentsPane.TalentTierPane(replaceOptions, tier, TalentButton.Mode.METAMORPH_REPLACE);
-				add(optionsPane);
-				optionsPane.title.text(" ");
-				optionsPane.setPos(0, top);
-				optionsPane.setSize(120, optionsPane.height());
-				resize(120, (int)optionsPane.bottom());
-			}
+			TalentsPane.TalentTierPane optionsPane = id >= 0
+					? new TalentsPane.TalentTierPane(replaceOptions, tier, TalentButton.Mode.METAMORPH_REPLACE, id, 0)
+					: new TalentsPane.TalentTierPane(replaceOptions, tier, TalentButton.Mode.METAMORPH_REPLACE);
+			add(optionsPane);
+			optionsPane.title.text(" ");
+			optionsPane.setPos(0, top);
+			optionsPane.setSize(120, optionsPane.height());
+			resize(120, (int)optionsPane.bottom());
 		}
 
 		@Override
@@ -308,24 +235,6 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 				INSTANCE = null;
 			}
 		}
-
-		@Override
-		public void onBackPressed() {
-			if (false) {
-				((ScrollOfMetamorphosis) curItem).confirmCancelation(this, false);
-			} else {
-				super.onBackPressed();
-			}
-		}
-	}
-
-	private static @NotNull ArrayList<LinkedHashMap<Talent, Integer>> parseTalentTiers(@NotNull JSONArray tiers) {
-		ArrayList<LinkedHashMap<Talent, Integer>> result = new ArrayList<>();
-		for (int i = 0; i < tiers.length(); i++) {
-			JSONObject tier = tiers.getJSONObject(i);
-			result.add(parseTalentOptions(tier.getJSONArray("talents")));
-		}
-		return result;
 	}
 
 	private static @NotNull LinkedHashMap<Talent, Integer> parseTalentOptions(@NotNull JSONArray options) {
@@ -337,43 +246,13 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 		return result;
 	}
 
-	private static float layoutTalentButtons(@NotNull Window window, int windowId, @NotNull JSONArray groups, float top) {
-		JSONArray options = new JSONArray();
+	private static @NotNull ArrayList<LinkedHashMap<Talent, Integer>> parseTalentTiers(@NotNull JSONArray groups) {
+		ArrayList<LinkedHashMap<Talent, Integer>> result = new ArrayList<>();
 		for (int i = 0; i < groups.length(); i++) {
-			JSONObject groupOrOption = groups.getJSONObject(i);
-			JSONArray talents = groupOrOption.optJSONArray("talents");
-			if (talents == null) {
-				options.put(groupOrOption);
-			} else {
-				for (int j = 0; j < talents.length(); j++) {
-					options.put(talents.getJSONObject(j));
-				}
-			}
+			JSONObject group = groups.getJSONObject(i);
+			JSONArray talents = group.optJSONArray("talents");
+			result.add(parseTalentOptions(talents == null ? new JSONArray().put(group) : talents));
 		}
-		if (options.length() == 0) {
-			return top;
-		}
-
-		int perRow = Math.max(1, 120 / TalentButton.WIDTH);
-		for (int i = 0; i < options.length(); i++) {
-			JSONObject option = options.getJSONObject(i);
-			Talent talent = Talent.valueOf(JsonStringHelper.getString(option, "id"));
-			final int index = i;
-			IconButton button = new IconButton(new TalentIcon(talent)) {
-				@Override
-				protected void onClick() {
-					super.onClick();
-					SendData.sendWindowResult(windowId, index);
-					window.hide();
-				}
-			};
-			int row = i / perRow;
-			int col = i % perRow;
-			int rowCount = Math.min(perRow, options.length() - row * perRow);
-			float left = (120 - rowCount * TalentButton.WIDTH) / 2f;
-			button.setRect(left + col * TalentButton.WIDTH, top + row * TalentButton.HEIGHT, TalentButton.WIDTH, TalentButton.HEIGHT);
-			window.add(button);
-		}
-		return top + ((options.length() + perRow - 1) / perRow) * TalentButton.HEIGHT;
+		return result;
 	}
 }

@@ -34,7 +34,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
@@ -376,17 +375,12 @@ public class WndRanking extends WndTabbed {
 				}
 			}
 
-            Trinket trinket = null;
-			if (trinket != null){
-				slotsActive++;
-			}
-
-			float slotWidth = Math.min(28, ((WIDTH - slotsActive + 1) / (float)slotsActive));
+            float slotWidth = Math.min(28, ((WIDTH - slotsActive + 1) / (float)slotsActive));
 
 			for (int i = -1; i < QuickSlot.SIZE; i++){
 				Item item = null;
 				if (i == -1){
-					item = trinket;
+					item = null;
 				} else if (Dungeon.quickslot.isNonePlaceholder(i)) {
 					item = Dungeon.quickslot.getItem(i);
 				}

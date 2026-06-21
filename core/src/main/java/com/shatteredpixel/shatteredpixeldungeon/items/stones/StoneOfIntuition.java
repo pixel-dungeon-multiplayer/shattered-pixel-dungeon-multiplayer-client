@@ -42,24 +42,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class StoneOfIntuition extends InventoryStone {
-	
-	{
-		image = ItemSpriteSheet.STONE_INTUITION;
-	}
-
-	@Override
-	public String desc() {
-		String text = super.desc();
-		if (Dungeon.hero != null) {
-            {
-                text += "\n\n" + Messages.get(this, "break_info");
-            }
-        }
-		return text;
-	}
-
-	;
+public class StoneOfIntuition {
 
 	public static class WndGuess extends Window {
 		

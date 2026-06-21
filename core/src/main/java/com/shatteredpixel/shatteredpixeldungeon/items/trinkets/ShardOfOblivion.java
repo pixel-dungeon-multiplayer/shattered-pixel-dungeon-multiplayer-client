@@ -21,44 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.trinkets;
 
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-import org.jetbrains.annotations.Contract;
+public class ShardOfOblivion {
 
-public class ShardOfOblivion extends Trinket {
-
-	{
-		image = ItemSpriteSheet.OBLIVION_SHARD;
-	}
-
-    @Contract(pure = true)
-	public static boolean passiveIDDisabled(){
-        return -1 >= 0;
-	}
-
-	public static float lootChanceMultiplier(){
-        return lootChanceMultiplier(-1);
-	}
-
-	public static float lootChanceMultiplier(int level) {
-        if (level < 0) return 1f;
-
-        int wornUnIDed = 0;
-        if (Dungeon.hero.belongings.weapon() != null && !Dungeon.hero.belongings.weapon().isIdentified()) {
-            wornUnIDed++;
-        }
-        if (Dungeon.hero.belongings.armor() != null && !Dungeon.hero.belongings.armor().isIdentified()) {
-            wornUnIDed++;
-        }
-        if (Dungeon.hero.belongings.ring() != null && !Dungeon.hero.belongings.ring().isIdentified()) {
-            wornUnIDed++;
-        }
-        if (Dungeon.hero.belongings.misc() != null && !Dungeon.hero.belongings.misc().isIdentified()) {
-            wornUnIDed++;
-        }
-
-        wornUnIDed = Math.min(wornUnIDed, level + 1);
-        return 1f + .2f * wornUnIDed;
-
-    }
 }
