@@ -26,9 +26,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.BArray;
 import com.watabou.utils.PathFinder;
@@ -48,42 +45,6 @@ abstract public class KindOfWeapon extends EquipableItem {
 
 	protected float timeToEquip( Hero hero ) {
 		return isSwiftEquipping ? 0f : super.timeToEquip(hero);
-	}
-
-	public boolean equipSecondary( Hero hero ){
-
-		isSwiftEquipping = false;
-		if (hero.belongings.contains(this) && hero.hasTalent(Talent.SWIFT_EQUIP)){
-            isSwiftEquipping = true;
-        }
-
-		boolean wasInInv = hero.belongings.contains(this);
-
-		if (hero.belongings.secondWep == null || hero.belongings.secondWep.doUnequip( hero, true )) {
-
-			hero.belongings.secondWep = this;
-
-            updateQuickslot();
-
-			cursedKnown = true;
-			if (cursed) {
-				equipCursed( hero );
-				GLog.n( Messages.get(KindOfWeapon.class, "equip_cursed") );
-			}
-
-			hero.spendAndNext( timeToEquip(hero) );
-			if (isSwiftEquipping) {
-				GLog.i(Messages.get(this, "swift_equip"));
-				{
-				}
-				isSwiftEquipping = false;
-			}
-			return true;
-
-		} else {
-			isSwiftEquipping = false;
-            return false;
-		}
 	}
 
 	@Override

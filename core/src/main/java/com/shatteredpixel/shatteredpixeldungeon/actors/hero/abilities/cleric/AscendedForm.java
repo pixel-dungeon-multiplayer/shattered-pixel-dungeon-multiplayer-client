@@ -21,14 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric;
 
-import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ShieldBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
-import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 
 public class AscendedForm extends ArmorAbility {
@@ -47,78 +41,6 @@ public class AscendedForm extends ArmorAbility {
 	@Override
 	public Talent[] talents() {
 		return new Talent[]{Talent.DIVINE_INTERVENTION, Talent.JUDGEMENT, Talent.FLASH, Talent.HEROIC_ENERGY};
-	}
-
-	public static class AscendBuff extends ShieldBuff {
-
-		{
-			type = buffType.POSITIVE;
-
-			detachesAtZero = false;
-			shieldUsePriority = 1;
-		}
-
-		public static float DURATION = 10f;
-
-		@Override
-		public int icon() {
-			return BuffIndicator.ASCEND;
-		}
-
-		@Override
-		public float iconFadePercent() {
-			return Math.max(0, (DURATION - left) / DURATION);
-		}
-
-		@Override
-		public String iconTextDisplay() {
-			return Integer.toString((int)left);
-		}
-
-		@Override
-		public void fx(boolean on) {
-			if (on) target.sprite.add(CharSprite.State.GLOWING);
-			else    target.sprite.remove(CharSprite.State.GLOWING);
-		}
-
-		public int left = 10;
-		public int spellCasts = 0;
-		public int flashCasts = 0;
-		public boolean divineInverventionCast = false;
-
-		public void reset(){
-			setShield(30);
-			left = (int)DURATION;
-		}
-
-		public void extend( int amt ){
-			left += amt;
-		}
-
-		@Override
-		public boolean act() {
-			left--;
-			if (left <= 0){
-				detach();
-				for (Char ch : Actor.chars()) {
-                }
-				return true;
-			}
-
-			spend(TICK);
-			return true;
-		}
-
-		@Override
-		public String desc() {
-			return Messages.get(this, "desc", shielding(), left);
-		}
-
-		public static final String LEFT = "left";
-		public static final String SPELL_CASTS = "spell_casts";
-		public static final String FLASH_CASTS = "flash_casts";
-		public static final String DIVINE_INTERVENTION_CAST = "divine_intervention_cast";
-
 	}
 
 }

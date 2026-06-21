@@ -23,31 +23,22 @@ package com.shatteredpixel.shatteredpixeldungeon.items.wands;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Callback;
-import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
 
 public abstract class Wand extends Item {
 
 	public static final String AC_ZAP	= "ZAP";
 
-	private static final float TIME_TO_ZAP	= 1f;
-	
 	public int maxCharges = initialCharges();
 	public int curCharges = maxCharges;
 	public float partialCharge = 0f;
@@ -222,57 +213,7 @@ public abstract class Wand extends Item {
 		Sample.INSTANCE.play( Assets.Sounds.ZAP );
 	}
 
-	public void staffFx( MagesStaff.StaffParticle particle ){
-		particle.color(0xFFFFFF); particle.am = 0.3f;
-		particle.setLifespan( 1f);
-		particle.speed.polar( Random.Float(PointF.PI2), 2f );
-		particle.setSize( 1f, 2f );
-		particle.radiateXY(0.5f);
-	}
-
-	public void wandUsed() {
-		if (!isIdentified()) {
-			float uses = Math.min( availableUsesToID, 1f);
-			availableUsesToID -= uses;
-			usesLeftToID -= uses;
-			if (usesLeftToID <= 0 || Dungeon.hero.pointsInTalent(Talent.SCHOLARS_INTUITION) == 2) {
-                GLog.p(Messages.get(Wand.class, "identify"));
-
-            }
-        }
-
-		//inside staff
-
-        curCharges -= cursed ? 1 : chargesPerCast();
-
-		//remove magic charge at a higher priority, if we are benefiting from it are and not the
-		//wand that just applied it
-
-        if (Dungeon.hero.heroClass != HeroClass.CLERIC
-				&& Dungeon.hero.hasTalent(Talent.DIVINE_SENSE)){
-			Dungeon.hero.cooldown();
-		}
-
-		// 10/20/30%
-		if (Dungeon.hero.heroClass != HeroClass.CLERIC
-				&& Dungeon.hero.hasTalent(Talent.CLEANSE)
-				&& Random.Int(10) < Dungeon.hero.pointsInTalent(Talent.CLEANSE)){
-			boolean removed = false;
-			for (Buff b : Dungeon.hero.buffs()) {
-				if (b.type == Buff.buffType.NEGATIVE) {
-					b.detach();
-					removed = true;
-				}
-			}
-			if (removed) new Flare( 6, 32 ).color(0xFF4CD2, true).show( Dungeon.hero.sprite, 2f );
-		}
-
-        updateQuickslot();
-
-		curUser.spendAndNext( TIME_TO_ZAP );
-	}
-
-    @Override
+	@Override
 	public ItemSprite.Glowing glowing() {
 		if (resinBonus == 0) return null;
 

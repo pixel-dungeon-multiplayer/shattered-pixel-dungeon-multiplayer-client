@@ -169,15 +169,6 @@ abstract public class MissileWeapon extends Weapon {
 	protected final float durabilityPerUse( boolean rounded){
 		float usages = baseUses * (float)(Math.pow(3, level()));
 
-		//+50%/75% durability
-		if (Dungeon.hero != null && Dungeon.hero.hasTalent(Talent.DURABLE_PROJECTILES)){
-			usages *= 1.25f + (0.25f*Dungeon.hero.pointsInTalent(Talent.DURABLE_PROJECTILES));
-		}
-		if (holster) {
-			usages *= 1.2f;
-		}
-
-
 
 		//at 100 uses, items just last forever.
 		if (usages >= 100f) return 0;

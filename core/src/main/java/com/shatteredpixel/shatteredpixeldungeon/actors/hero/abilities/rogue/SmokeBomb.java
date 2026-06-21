@@ -22,10 +22,8 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MobSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.watabou.noosa.TextureFilm;
@@ -48,24 +46,7 @@ public class SmokeBomb extends ArmorAbility {
 		return new Talent[]{Talent.HASTY_RETREAT, Talent.BODY_REPLACEMENT, Talent.SHADOW_STEP, Talent.HEROIC_ENERGY};
 	}
 
-	public static class NinjaLog extends NPC {
-
-		{
-			spriteClass = NinjaLogSprite.class;
-			defenseSkill = 0;
-
-			alignment = Alignment.ALLY;
-
-			HT = 20;
-			if (Dungeon.hero != null) HT *= Dungeon.hero.pointsInTalent(Talent.BODY_REPLACEMENT);
-			HP = HT;
-		}
-
-		{
-		}
-
-	}
-
+	@SuppressWarnings("unused")
 	public static class NinjaLogSprite extends MobSprite {
 
 		public NinjaLogSprite(){
