@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -39,6 +40,9 @@ import com.watabou.noosa.Game;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.ui.Component;
 import com.watabou.utils.DeviceCompat;
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -53,6 +57,95 @@ public class WndHeroInfo extends WndTabbed {
 	private static int WIDTH = 120;
 	private static int MIN_HEIGHT = 125;
 	private static int MARGIN = 2;
+
+	public WndHeroInfo(int id, @NotNull JSONObject args) {
+		super();
+		setId(id);
+		int finalHeight = MIN_HEIGHT;
+
+		RemoteHeroInfoTab remoteHeroInfo = new RemoteHeroInfoTab(args);
+		add(remoteHeroInfo);
+		remoteHeroInfo.setSize(WIDTH, MIN_HEIGHT);
+		finalHeight = (int)Math.max(finalHeight, remoteHeroInfo.height());
+		add(new IconTab(heroClassIcon(JsonStringHelper.getString(args, "hero_class"))) {
+			@Override
+			protected void select(boolean value) {
+				super.select(value);
+				remoteHeroInfo.visible = remoteHeroInfo.active = selected;
+			}
+		});
+
+		RemoteTalentInfoTab remoteTalentInfo = new RemoteTalentInfoTab(args.optJSONArray("talent_tiers"));
+		add(remoteTalentInfo);
+		remoteTalentInfo.setSize(WIDTH, MIN_HEIGHT);
+		finalHeight = (int)Math.max(finalHeight, remoteTalentInfo.height());
+		add(new IconTab(Icons.get(Icons.TALENT)) {
+			@Override
+			protected void select(boolean value) {
+				super.select(value);
+				remoteTalentInfo.visible = remoteTalentInfo.active = selected;
+			}
+		});
+
+		if (args.optBoolean("subclass_unlocked", false)) {
+			RemoteTextListTab subclasses = new RemoteTextListTab(Messages.titleCase(Messages.get(WndHeroInfo.class, "subclasses")), args.optJSONArray("subclasses"), "title", "short_description");
+			add(subclasses);
+			subclasses.setSize(WIDTH, MIN_HEIGHT);
+			finalHeight = (int)Math.max(finalHeight, subclasses.height());
+			add(new IconTab(new ItemSprite(ItemSpriteSheet.MASK, null)) {
+				@Override
+				protected void select(boolean value) {
+					super.select(value);
+					subclasses.visible = subclasses.active = selected;
+				}
+			});
+		}
+
+		if (args.optBoolean("ability_unlocked", false)) {
+			RemoteTextListTab abilities = new RemoteTextListTab(Messages.titleCase(Messages.get(WndHeroInfo.class, "abilities")), args.optJSONArray("abilities"), "name", "short_description");
+			add(abilities);
+			abilities.setSize(WIDTH, MIN_HEIGHT);
+			finalHeight = (int)Math.max(finalHeight, abilities.height());
+			add(new IconTab(new ItemSprite(ItemSpriteSheet.CROWN, null)) {
+				@Override
+				protected void select(boolean value) {
+					super.select(value);
+					abilities.visible = abilities.active = selected;
+				}
+			});
+		}
+
+		resize(WIDTH, finalHeight);
+		layoutTabs();
+		int selectedTab = args.optInt("selected_tab", 0);
+		if (selectedTab >= 0 && selectedTab < tabs.size()) {
+			select(selectedTab);
+		} else {
+			select(0);
+		}
+	}
+
+	private static @NotNull Image heroClassIcon(@NotNull String heroClass) {
+		try {
+			switch (HeroClass.valueOf(heroClass)) {
+				case MAGE:
+					return new ItemSprite(ItemSpriteSheet.MAGES_STAFF, null);
+				case ROGUE:
+					return new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK, null);
+				case HUNTRESS:
+					return new ItemSprite(ItemSpriteSheet.SPIRIT_BOW, null);
+				case DUELIST:
+					return new ItemSprite(ItemSpriteSheet.RAPIER, null);
+				case CLERIC:
+					return new ItemSprite(ItemSpriteSheet.ARTIFACT_TOME, null);
+				case WARRIOR:
+				default:
+					return new ItemSprite(ItemSpriteSheet.SEAL, null);
+			}
+		} catch (IllegalArgumentException e) {
+			return Icons.get(Icons.INFO);
+		}
+	}
 
 	public WndHeroInfo( HeroClass cl ){
 
@@ -148,7 +241,138 @@ public class WndHeroInfo extends WndTabbed {
 	@Override
 	public void offset(int xOffset, int yOffset) {
 		super.offset(xOffset, yOffset);
-		talentInfo.layout();
+		if (talentInfo != null) {
+			talentInfo.layout();
+		}
+	}
+
+	private static class RemoteHeroInfoTab extends Component {
+
+		private final @NotNull JSONObject args;
+		private RenderedTextBlock title;
+		private RenderedTextBlock description;
+
+		private RemoteHeroInfoTab(@NotNull JSONObject args) {
+			super();
+			this.args = args;
+		}
+
+		@Override
+		protected void createChildren() {
+			super.createChildren();
+			title = PixelScene.renderTextBlock(JsonStringHelper.getString(args, "title"), 9);
+			title.hardlight(TITLE_COLOR);
+			add(title);
+
+			description = PixelScene.renderTextBlock(JsonStringHelper.getString(args, "description"), 6);
+			add(description);
+		}
+
+		@Override
+		protected void layout() {
+			super.layout();
+			title.setPos((width - title.width()) / 2, MARGIN);
+			description.maxWidth((int)width);
+			description.setPos(0, title.bottom() + 4 * MARGIN);
+			height = Math.max(height, description.bottom());
+		}
+	}
+
+	private static class RemoteTalentInfoTab extends Component {
+
+		private final @NotNull JSONArray tiers;
+		private RenderedTextBlock title;
+		private TalentsPane talentPane;
+
+		private RemoteTalentInfoTab(@org.jetbrains.annotations.Nullable JSONArray tiers) {
+			super();
+			this.tiers = tiers == null ? new JSONArray() : tiers;
+		}
+
+		@Override
+		protected void createChildren() {
+			super.createChildren();
+			title = PixelScene.renderTextBlock(Messages.titleCase(Messages.get(WndHeroInfo.class, "talents")), 9);
+			title.hardlight(TITLE_COLOR);
+			add(title);
+
+			talentPane = new TalentsPane(TalentButton.Mode.INFO, parseTalents(tiers));
+			add(talentPane);
+		}
+
+		@Override
+		protected void layout() {
+			super.layout();
+			title.setPos((width - title.width()) / 2, MARGIN);
+			talentPane.setRect(0, title.bottom() + 3 * MARGIN, width, 100);
+			height = Math.max(height, talentPane.bottom());
+		}
+	}
+
+	private static class RemoteTextListTab extends Component {
+
+		private final @NotNull String titleText;
+		private final @NotNull JSONArray entries;
+		private final @NotNull String titleKey;
+		private final @NotNull String descriptionKey;
+		private RenderedTextBlock title;
+		private final @NotNull ArrayList<RenderedTextBlock> lines = new ArrayList<>();
+
+		private RemoteTextListTab(@NotNull String titleText, @org.jetbrains.annotations.Nullable JSONArray entries, @NotNull String titleKey, @NotNull String descriptionKey) {
+			super();
+			this.titleText = titleText;
+			this.entries = entries == null ? new JSONArray() : entries;
+			this.titleKey = titleKey;
+			this.descriptionKey = descriptionKey;
+		}
+
+		@Override
+		protected void createChildren() {
+			super.createChildren();
+			title = PixelScene.renderTextBlock(titleText, 9);
+			title.hardlight(TITLE_COLOR);
+			add(title);
+
+			for (int i = 0; i < entries.length(); i++) {
+				JSONObject entry = entries.getJSONObject(i);
+				RenderedTextBlock line = PixelScene.renderTextBlock(
+						Messages.titleCase(JsonStringHelper.getString(entry, titleKey)) + "\n" + JsonStringHelper.getString(entry, descriptionKey),
+						6
+				);
+				lines.add(line);
+				add(line);
+			}
+		}
+
+		@Override
+		protected void layout() {
+			super.layout();
+			title.setPos((width - title.width()) / 2, MARGIN);
+			float pos = title.bottom() + 4 * MARGIN;
+			for (RenderedTextBlock line : lines) {
+				line.maxWidth((int)width);
+				line.setPos(0, pos);
+				pos = line.bottom() + 4 * MARGIN;
+			}
+			height = Math.max(height, pos - 4 * MARGIN);
+		}
+	}
+
+	private static @NotNull ArrayList<LinkedHashMap<Talent, Integer>> parseTalents(@NotNull JSONArray tiers) {
+		ArrayList<LinkedHashMap<Talent, Integer>> result = new ArrayList<>();
+		for (int i = 0; i < tiers.length(); i++) {
+			JSONObject tier = tiers.getJSONObject(i);
+			LinkedHashMap<Talent, Integer> talents = new LinkedHashMap<>();
+			JSONArray talentArray = tier.optJSONArray("talents");
+			if (talentArray != null) {
+				for (int j = 0; j < talentArray.length(); j++) {
+					JSONObject talent = talentArray.getJSONObject(j);
+					talents.put(Talent.valueOf(JsonStringHelper.getString(talent, "id")), talent.optInt("points", 0));
+				}
+			}
+			result.add(talents);
+		}
+		return result;
 	}
 
 	private static class HeroInfoTab extends Component {

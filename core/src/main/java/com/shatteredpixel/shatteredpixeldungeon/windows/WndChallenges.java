@@ -25,12 +25,16 @@ import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CheckBox;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -43,6 +47,49 @@ public class WndChallenges extends Window {
 
 	private boolean editable;
 	private ArrayList<CheckBox> boxes;
+
+	public WndChallenges(int id, @NotNull JSONObject args) {
+		super();
+		setId(id);
+		this.editable = args.optBoolean("editable", false);
+		boxes = new ArrayList<>();
+
+		RenderedTextBlock title = PixelScene.renderTextBlock(JsonStringHelper.getString(args, "title"), 12);
+		title.hardlight(TITLE_COLOR);
+		title.setPos((WIDTH - title.width()) / 2, (TTL_HEIGHT - title.height()) / 2);
+		PixelScene.align(title);
+		add(title);
+
+		float pos = TTL_HEIGHT;
+		JSONArray challenges = args.getJSONArray("challenges");
+		for (int i = 0; i < challenges.length(); i++) {
+			JSONObject challenge = challenges.getJSONObject(i);
+			CheckBox cb = new CheckBox(JsonStringHelper.getString(challenge, "title"));
+			cb.checked(challenge.optBoolean("checked", false));
+			cb.active = editable;
+			if (i > 0) {
+				pos += GAP;
+			}
+			cb.setRect(0, pos, WIDTH - 16, BTN_HEIGHT);
+			add(cb);
+			boxes.add(cb);
+
+			final @NotNull String description = JsonStringHelper.getString(challenge, "description");
+			IconButton info = new IconButton(Icons.get(Icons.INFO)) {
+				@Override
+				protected void onClick() {
+					super.onClick();
+					ShatteredPixelDungeon.scene().add(new WndMessage(description));
+				}
+			};
+			info.setRect(cb.right(), pos, 16, BTN_HEIGHT);
+			add(info);
+
+			pos = cb.bottom();
+		}
+
+		resize(WIDTH, (int)pos);
+	}
 
 	public WndChallenges( int checked, boolean editable ) {
 

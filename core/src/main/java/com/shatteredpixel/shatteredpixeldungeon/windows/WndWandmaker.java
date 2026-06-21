@@ -43,7 +43,7 @@ public class WndWandmaker extends Window {
 	private static final int GAP		= 2;
 
 	public WndWandmaker(JSONObject object){
-		id = object.getInt("id");
+		setId(object.getInt("id"));
 		IconTitle titlebar = new IconTitle();
 		JSONObject args = object.getJSONObject("args");
 		Item item = CustomItem.createItem(args.getJSONObject("quest_item"));
@@ -94,7 +94,7 @@ public class WndWandmaker extends Window {
 	}
 
 	private void selectReward( int index ) {
-		SendData.sendWindowResult(id, index);
+		SendData.sendWindowResult(getId(), index);
 	}
 
 	private class RewardWindow extends WndInfoItem {

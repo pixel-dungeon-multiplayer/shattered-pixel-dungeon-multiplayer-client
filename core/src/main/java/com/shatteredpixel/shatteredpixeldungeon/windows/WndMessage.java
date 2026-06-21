@@ -32,7 +32,7 @@ public class WndMessage extends Window {
 	private static final int MARGIN = 4;
 	public WndMessage(int id, String text ) {
 		this(text);
-		this.id = id;
+		this.setId(id);
 	}
 	public WndMessage( String text ) {
 		

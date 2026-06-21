@@ -28,17 +28,24 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Transmuting;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.InventoryScroll;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
+import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TalentButton;
+import com.shatteredpixel.shatteredpixeldungeon.ui.TalentIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TalentsPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.shatteredpixel.shatteredpixeldungeon.windows.IconTitle;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.utils.Random;
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -91,6 +98,27 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 		public static WndMetamorphChoose INSTANCE;
 
 		TalentsPane pane;
+
+		public WndMetamorphChoose(int id, @NotNull JSONObject args) {
+			super();
+			setId(id);
+			INSTANCE = this;
+
+			float top = 0;
+			IconTitle title = new IconTitle(new ItemSprite(ItemSpriteSheet.EXOTIC_TIWAZ), Messages.titleCase(Messages.get(ScrollOfMetamorphosis.class, "name")));
+			title.color(TITLE_COLOR);
+			title.setRect(0, 0, 120, 0);
+			add(title);
+
+			top = title.bottom() + 2;
+			RenderedTextBlock text = PixelScene.renderTextBlock(JsonStringHelper.getString(args, "message"), 6);
+			text.maxWidth(120);
+			text.setPos(0, top);
+			add(text);
+
+			top = text.bottom() + 2;
+			resize(120, (int)layoutTalentButtons(this, id, args.getJSONArray("tiers"), top));
+		}
 
 		public WndMetamorphChoose(){
 			super();
@@ -161,6 +189,16 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 		public int tier;
 		LinkedHashMap<Talent, Integer> replaceOptions;
 
+		public WndMetamorphReplace(int id, @NotNull JSONObject args) {
+			super();
+			setId(id);
+			INSTANCE = this;
+			replacing = Talent.valueOf(JsonStringHelper.getString(args, "replacing"));
+			tier = args.getInt("tier");
+			replaceOptions = parseTalentOptions(args.getJSONArray("options"));
+			setup(id, JsonStringHelper.getString(args, "message"), tier, replaceOptions);
+		}
+
 		//for window restoring
 		public WndMetamorphReplace(){
 			super();
@@ -218,30 +256,49 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 		}
 
 		private void setup(Talent replacing, int tier, LinkedHashMap<Talent, Integer> replaceOptions){
+			setup(Messages.get(ScrollOfMetamorphosis.class, "replace_desc"), tier, replaceOptions);
+		}
+
+		private void setup(@NotNull String message, int tier, @NotNull LinkedHashMap<Talent, Integer> replaceOptions){
+			setup(-1, message, tier, replaceOptions);
+		}
+
+		private void setup(int id, @NotNull String message, int tier, @NotNull LinkedHashMap<Talent, Integer> replaceOptions){
 			float top = 0;
 
-			IconTitle title = new IconTitle( curItem );
+			IconTitle title = curItem == null
+					? new IconTitle(new ItemSprite(ItemSpriteSheet.EXOTIC_TIWAZ), Messages.titleCase(Messages.get(ScrollOfMetamorphosis.class, "name")))
+					: new IconTitle(curItem);
 			title.color( TITLE_COLOR );
 			title.setRect(0, 0, 120, 0);
 			add(title);
 
 			top = title.bottom() + 2;
 
-			RenderedTextBlock text = PixelScene.renderTextBlock(Messages.get(ScrollOfMetamorphosis.class, "replace_desc"), 6);
+			RenderedTextBlock text = PixelScene.renderTextBlock(message, 6);
 			text.maxWidth(120);
 			text.setPos(0, top);
 			add(text);
 
 			top = text.bottom() + 2;
 
-			TalentsPane.TalentTierPane optionsPane = new TalentsPane.TalentTierPane(replaceOptions, tier, TalentButton.Mode.METAMORPH_REPLACE);
-			add(optionsPane);
-			optionsPane.title.text(" ");
-			optionsPane.setPos(0, top);
-			optionsPane.setSize(120, optionsPane.height());
-			resize((int)optionsPane.width(), (int)optionsPane.bottom());
-
-			resize(120, (int)optionsPane.bottom());
+			if (id >= 0) {
+				JSONArray options = new JSONArray();
+				for (Talent talent : replaceOptions.keySet()) {
+					JSONObject option = new JSONObject();
+					option.put("id", talent.name());
+					option.put("points", replaceOptions.get(talent));
+					options.put(option);
+				}
+				resize(120, (int)layoutTalentButtons(this, id, options, top));
+			} else {
+				TalentsPane.TalentTierPane optionsPane = new TalentsPane.TalentTierPane(replaceOptions, tier, TalentButton.Mode.METAMORPH_REPLACE);
+				add(optionsPane);
+				optionsPane.title.text(" ");
+				optionsPane.setPos(0, top);
+				optionsPane.setSize(120, optionsPane.height());
+				resize(120, (int)optionsPane.bottom());
+			}
 		}
 
 		@Override
@@ -260,5 +317,63 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 				super.onBackPressed();
 			}
 		}
+	}
+
+	private static @NotNull ArrayList<LinkedHashMap<Talent, Integer>> parseTalentTiers(@NotNull JSONArray tiers) {
+		ArrayList<LinkedHashMap<Talent, Integer>> result = new ArrayList<>();
+		for (int i = 0; i < tiers.length(); i++) {
+			JSONObject tier = tiers.getJSONObject(i);
+			result.add(parseTalentOptions(tier.getJSONArray("talents")));
+		}
+		return result;
+	}
+
+	private static @NotNull LinkedHashMap<Talent, Integer> parseTalentOptions(@NotNull JSONArray options) {
+		LinkedHashMap<Talent, Integer> result = new LinkedHashMap<>();
+		for (int i = 0; i < options.length(); i++) {
+			JSONObject option = options.getJSONObject(i);
+			result.put(Talent.valueOf(JsonStringHelper.getString(option, "id")), option.optInt("points", 0));
+		}
+		return result;
+	}
+
+	private static float layoutTalentButtons(@NotNull Window window, int windowId, @NotNull JSONArray groups, float top) {
+		JSONArray options = new JSONArray();
+		for (int i = 0; i < groups.length(); i++) {
+			JSONObject groupOrOption = groups.getJSONObject(i);
+			JSONArray talents = groupOrOption.optJSONArray("talents");
+			if (talents == null) {
+				options.put(groupOrOption);
+			} else {
+				for (int j = 0; j < talents.length(); j++) {
+					options.put(talents.getJSONObject(j));
+				}
+			}
+		}
+		if (options.length() == 0) {
+			return top;
+		}
+
+		int perRow = Math.max(1, 120 / TalentButton.WIDTH);
+		for (int i = 0; i < options.length(); i++) {
+			JSONObject option = options.getJSONObject(i);
+			Talent talent = Talent.valueOf(JsonStringHelper.getString(option, "id"));
+			final int index = i;
+			IconButton button = new IconButton(new TalentIcon(talent)) {
+				@Override
+				protected void onClick() {
+					super.onClick();
+					SendData.sendWindowResult(windowId, index);
+					window.hide();
+				}
+			};
+			int row = i / perRow;
+			int col = i % perRow;
+			int rowCount = Math.min(perRow, options.length() - row * perRow);
+			float left = (120 - rowCount * TalentButton.WIDTH) / 2f;
+			button.setRect(left + col * TalentButton.WIDTH, top + row * TalentButton.HEIGHT, TalentButton.WIDTH, TalentButton.HEIGHT);
+			window.add(button);
+		}
+		return top + ((options.length() + perRow - 1) / perRow) * TalentButton.HEIGHT;
 	}
 }

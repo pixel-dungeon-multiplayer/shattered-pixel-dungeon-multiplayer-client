@@ -22,13 +22,23 @@
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.items.CustomItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
+import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
+import com.watabou.noosa.ColorBlock;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class WndUpgrade extends Window {
 
@@ -46,6 +56,77 @@ public class WndUpgrade extends Window {
 
 	private RedButton btnUpgrade;
 	private RedButton btnCancel;
+
+	public WndUpgrade(int id, @NotNull JSONObject args) {
+		super();
+		setId(id);
+		Item item = CustomItem.createItem(args.getJSONObject("item"));
+		Item upgraderItem = CustomItem.createItem(args.getJSONObject("upgrader"));
+
+		IconTitle title = new IconTitle(new ItemSprite(upgraderItem), JsonStringHelper.getString(args, "title"));
+		title.setRect(0, 0, WIDTH, 0);
+		add(title);
+
+		RenderedTextBlock desc = PixelScene.renderTextBlock(6);
+		desc.text(JsonStringHelper.getString(args, "desc"), WIDTH);
+		desc.setPos(0, title.bottom() + GAP);
+		add(desc);
+
+		float bottom = desc.bottom() + 2 * GAP;
+		bottom = addSlot(args.optJSONObject("left_slot"), COL_2, bottom);
+		bottom = Math.max(bottom, addSlot(args.optJSONObject("right_slot"), COL_3, desc.bottom() + 2 * GAP));
+
+		JSONArray stats = args.optJSONArray("stats");
+		if (stats != null) {
+			for (int i = 0; i < stats.length(); i++) {
+				JSONObject stat = stats.getJSONObject(i);
+				bottom = fillFields(
+						JsonStringHelper.getString(stat, "title"),
+						JsonStringHelper.getString(stat, "val_from"),
+						JsonStringHelper.getString(stat, "val_to"),
+						bottom
+				);
+			}
+		}
+
+		JSONArray messages = args.optJSONArray("messages");
+		if (messages != null) {
+			for (int i = 0; i < messages.length(); i++) {
+				JSONObject message = messages.getJSONObject(i);
+				bottom = addMessage(JsonStringHelper.getString(message, "text"), message.getInt("color"), bottom);
+			}
+		}
+
+		JSONObject buttons = args.getJSONObject("buttons");
+		JSONObject upgrade = buttons.getJSONObject("upgrade");
+		btnUpgrade = new RedButton(JsonStringHelper.getString(upgrade, "text")) {
+			@Override
+			protected void onClick() {
+				super.onClick();
+				SendData.sendWindowResult(getId(), 0);
+				hide();
+			}
+		};
+		btnUpgrade.icon(new ItemSprite(upgraderItem));
+		btnUpgrade.enable(upgrade.optBoolean("enabled", true));
+		btnUpgrade.setRect(0, bottom + 2 * GAP, WIDTH / 2f, 16);
+		add(btnUpgrade);
+
+		JSONObject cancel = buttons.getJSONObject("cancel");
+		btnCancel = new RedButton(JsonStringHelper.getString(cancel, "text")) {
+			@Override
+			protected void onClick() {
+				super.onClick();
+				SendData.sendWindowResult(getId(), 1);
+				hide();
+			}
+		};
+		btnCancel.icon(Icons.EXIT.get());
+		btnCancel.setRect(btnUpgrade.right() + 1, bottom + 2 * GAP, WIDTH / 2f, 16);
+		add(btnCancel);
+
+		resize(WIDTH, (int)btnCancel.bottom());
+	}
 
 	public WndUpgrade( Item upgrader, Item toUpgrade, boolean force){
 		// TODO: 19.02.2026 implement WndUpgrade both client and server side
@@ -465,6 +546,32 @@ public class WndUpgrade extends Window {
 //
 //		resize(WIDTH, (int)bottom);
 
+	}
+
+	private float addSlot(@Nullable JSONObject slot, float center, float top) {
+		if (slot == null) {
+			return top;
+		}
+		ColorBlock bg = new ColorBlock(ITEMSLOT_SIZE, ITEMSLOT_SIZE, slot.optInt("bg_color", 0x9953564D));
+		bg.x = center - ITEMSLOT_SIZE / 2f;
+		bg.y = top;
+		add(bg);
+
+		Item slotItem = CustomItem.createItem(slot.getJSONObject("item"));
+		ItemSprite sprite = new ItemSprite(slotItem);
+		sprite.x = center - sprite.width() / 2f;
+		sprite.y = bg.y + (ITEMSLOT_SIZE - sprite.height()) / 2f;
+		PixelScene.align(sprite);
+		add(sprite);
+
+		String levelText = JsonStringHelper.optString(slot, "level_text", "");
+		if (!levelText.isEmpty()) {
+			RenderedTextBlock level = PixelScene.renderTextBlock(levelText, 6);
+			level.hardlight(slot.optInt("level_color", 0xFFFFFF));
+			level.setPos(center + ITEMSLOT_SIZE / 2f - level.width(), bg.y + ITEMSLOT_SIZE - level.height());
+			add(level);
+		}
+		return bg.y + ITEMSLOT_SIZE + GAP;
 	}
 
 	@Override

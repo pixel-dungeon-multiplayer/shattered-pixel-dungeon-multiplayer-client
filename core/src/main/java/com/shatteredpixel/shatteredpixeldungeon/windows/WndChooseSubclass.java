@@ -45,7 +45,7 @@ public class WndChooseSubclass extends Window {
 	public WndChooseSubclass(JSONObject object) {
 		super();
 
-		id = object.getInt("id");
+		setId(object.getInt("id"));
 		JSONObject args = object.getJSONObject("args");
 		HeroSubClass[] options = new HeroSubClass[]{
 				HeroSubClass.valueOf(JsonStringHelper.getString(args, "option1")),
@@ -120,7 +120,7 @@ public class WndChooseSubclass extends Window {
 							hide();
 							if (index == 0 && WndChooseSubclass.this.parent != null){
 								WndChooseSubclass.this.hide();
-								SendData.sendWindowResult(WndChooseSubclass.this.id, finalIndex);
+								SendData.sendWindowResult(WndChooseSubclass.this.getId(), finalIndex);
 								Statistics.qualifiedForRandomVictoryBadge = false;
 							}
 						}

@@ -43,8 +43,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.level;
-
 public class DefaultActionParserRegistry {
 
     public static ActionParserRegistry create() {
@@ -108,7 +106,8 @@ public class DefaultActionParserRegistry {
         register(registry, "item_replace", 1, new ItemReplaceParser());
         register(registry, "heap_update", 1, new HeapUpdateParser());
         register(registry, "heap_remove", 1, new HeapRemoveParser());
-        register(registry, "show_window", 1, new ShowWindowParser());
+        register(registry, "update_window", 1, new UpdateWindowParser());
+        register(registry, "hide_window", 1, new HideWindowParser());
         register(registry, "update_floor_info", 1, new UpdateFloorInfoParser());
         register(registry, "locked_floor_state", 1, new LockedFloorStateParser());
         register(registry, "update_counter", 1, new UpdateCounterParser());

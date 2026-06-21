@@ -151,7 +151,7 @@ public class WndTradeItem extends WndInfoItem {
     public WndTradeItem(JSONObject windowObj) {
 		//would love java 23 statements before super
 		super(CustomItem.createItem(windowObj.getJSONObject("args").getJSONObject("item")));
-		id = windowObj.getInt("id");
+		setId(windowObj.getInt("id"));
 		JSONObject args = windowObj.getJSONObject("args");
 		this.selling = args.getBoolean("selling");
 		if (selling) {
@@ -169,7 +169,7 @@ public class WndTradeItem extends WndInfoItem {
 			RedButton btnSell = new RedButton( Messages.get(this, "sell", value) ) {
 				@Override
 				protected void onClick() {
-					SendData.sendWindowResult(id, 1);
+					SendData.sendWindowResult(getId(), 1);
 					hide();
 				}
 			};
@@ -185,7 +185,7 @@ public class WndTradeItem extends WndInfoItem {
 			RedButton btnSell1 = new RedButton( Messages.get(this, "sell_1", priceAll / item.quantity()) ) {
 				@Override
 				protected void onClick() {
-					SendData.sendWindowResult(id, 0);
+					SendData.sendWindowResult(getId(), 0);
 
 					hide();
 				}
@@ -196,7 +196,7 @@ public class WndTradeItem extends WndInfoItem {
 			RedButton btnSellAll = new RedButton( Messages.get(this, "sell_all", priceAll ) ) {
 				@Override
 				protected void onClick() {
-					SendData.sendWindowResult(id, 1);
+					SendData.sendWindowResult(getId(), 1);
 					hide();
 				}
 			};
@@ -226,7 +226,7 @@ public class WndTradeItem extends WndInfoItem {
 			@Override
 			protected void onClick() {
 				hide();
-				SendData.sendWindowResult(id, 0);
+				SendData.sendWindowResult(getId(), 0);
 			}
 		};
 		btnBuy.setRect( 0, pos + GAP, width, BTN_HEIGHT );
@@ -242,7 +242,7 @@ public class WndTradeItem extends WndInfoItem {
 				@Override
 				protected void onClick() {
 					if (chance >= 1) {
-						SendData.sendWindowResult(id, 1);
+						SendData.sendWindowResult(getId(), 1);
 						hide();
 					} else {
 						GameScene.show(new WndOptions(new ItemSprite(ItemSpriteSheet.ARTIFACT_ARMBAND),
@@ -254,7 +254,7 @@ public class WndTradeItem extends WndInfoItem {
 							protected void onSelect(int index) {
 								super.onSelect(index);
 								if (index == 0) {
-									SendData.sendWindowResult(id, 1);
+									SendData.sendWindowResult(getId(), 1);
 								}
 							}
 						});

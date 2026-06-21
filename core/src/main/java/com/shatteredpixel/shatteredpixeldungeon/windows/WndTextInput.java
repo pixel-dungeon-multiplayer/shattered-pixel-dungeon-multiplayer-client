@@ -23,6 +23,8 @@ package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.badlogic.gdx.Gdx;
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
+import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
+import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
@@ -30,6 +32,8 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.watabou.input.PointerEvent;
 import com.watabou.noosa.TextInput;
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 
 public class WndTextInput extends Window {
 
@@ -42,6 +46,19 @@ public class WndTextInput extends Window {
 
 	protected RedButton btnCopy;
 	protected RedButton btnPaste;
+
+	public WndTextInput(final int id, final @NotNull JSONObject args) {
+		this(
+				args.isNull("title") ? null : JsonStringHelper.getString(args, "title"),
+				args.isNull("message") ? null : JsonStringHelper.getString(args, "message"),
+				JsonStringHelper.optString(args, "initial_value", ""),
+				args.optInt("max_length", Integer.MAX_VALUE),
+				args.optBoolean("is_multi_line", false),
+				JsonStringHelper.optString(args, "positive_text", ""),
+				args.isNull("negative_text") ? null : JsonStringHelper.getString(args, "negative_text")
+		);
+		setId(id);
+	}
 
 	public WndTextInput(final String title, final String body, final String initialValue, final int maxLength,
 	                           final boolean multiLine, final String posTxt, final String negTxt) {
@@ -226,7 +243,11 @@ public class WndTextInput extends Window {
 		}
 	}
 
-	public void onSelect(boolean positive, String text){ }
+	public void onSelect(boolean positive, String text){ 
+		if (getId() >= 0) {
+			SendData.sendWindowResult(getId(), positive ? 0 : 1, new JSONObject().put("text", text));
+		}
+	}
 
 	@Override
 	public void onBackPressed() {

@@ -562,7 +562,7 @@ public class WndBag extends WndTabbed {
 				title,
 				allowed_items
 		);
-		this.id = id;
+		this.setId(id);
 	}
 	public enum Mode {
 		ALL,

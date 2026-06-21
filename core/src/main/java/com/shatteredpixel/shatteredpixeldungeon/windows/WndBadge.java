@@ -23,40 +23,45 @@ package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BadgeBanner;
+import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.watabou.input.PointerEvent;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.PointerArea;
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 
 public class WndBadge extends Window {
 	
 	private static final int MAX_WIDTH = 125;
 	private static final int MARGIN = 4;
+
+	public WndBadge(int id, @NotNull JSONObject args) {
+		this(args.getInt("image"), JsonStringHelper.getString(args, "title"), JsonStringHelper.getString(args, "description"), args.optBoolean("unlocked", false));
+		setId(id);
+	}
 	
 	public WndBadge( Badges.Badge badge, boolean unlocked ) {
+		this(badge.image, badge.title(), badge.desc() + (Badges.showCompletionProgress(badge) == null ? "" : Badges.showCompletionProgress(badge)), unlocked);
+	}
+
+	private WndBadge(int image, @NotNull String titleText, @NotNull String desc, boolean unlocked) {
 		
 		super();
 		
-		Image icon = BadgeBanner.image( badge.image );
+		Image icon = BadgeBanner.image( image );
 		icon.scale.set( 2 );
 		if (!unlocked) icon.brightness(0.4f);
 		add( icon );
 
-		RenderedTextBlock title = PixelScene.renderTextBlock( badge.title(), 9 );
+		RenderedTextBlock title = PixelScene.renderTextBlock( titleText, 9 );
 		title.maxWidth(MAX_WIDTH - MARGIN * 2);
 		title.align(RenderedTextBlock.CENTER_ALIGN);
 		title.hardlight(TITLE_COLOR);
 		if (!unlocked) title.hardlight( 0x888822 );
 		add(title);
-
-		String desc = badge.desc();
-		String unlock = Badges.showCompletionProgress(badge);
-
-		if (unlock != null){
-			desc += unlock;
-		}
 
 		RenderedTextBlock info = PixelScene.renderTextBlock( desc, 6 );
 		info.maxWidth(MAX_WIDTH - MARGIN * 2);
@@ -80,7 +85,7 @@ public class WndBadge extends Window {
 		PixelScene.align(info);
 		resize( (int)w, (int)(info.bottom() + MARGIN) );
 		
-		if (unlocked) BadgeBanner.highlight( icon, badge.image );
+		if (unlocked) BadgeBanner.highlight( icon, image );
 
 		PointerArea blocker = new PointerArea( 0, 0, PixelScene.uiCamera.width, PixelScene.uiCamera.height ) {
 			@Override

@@ -21,8 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
-import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
-import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.CustomItem;
 import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
 import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
@@ -35,7 +33,6 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
-import com.watabou.noosa.BitmapTextMultiline;
 import com.watabou.noosa.Image;
 
 import org.json.JSONArray;
@@ -114,8 +111,8 @@ public class WndOptions extends Window {
 	}
 	
 	protected void onSelect( int index ) {
-		if (id >= 0){
-			SendData.sendWindowResult(id, index);
+		if (getId() >= 0){
+			SendData.sendWindowResult(getId(), index);
 		}
 	}
 
@@ -134,10 +131,10 @@ public class WndOptions extends Window {
 	}
 	public WndOptions(int id, String title, String message, String... options ) {
 		this(title, message, options);
-		this.id =  id;
+		this.setId(id);
 	}
 	public WndOptions(int id, JSONObject args) throws JSONException {
-		this.id = id;
+		this.setId(id);
 		Image icon = null;
 		JSONArray optionsArr = args.getJSONArray("options");
 		String[] options = new String[optionsArr.length()];

@@ -27,7 +27,9 @@ import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
@@ -48,8 +50,13 @@ import com.watabou.noosa.Gizmo;
 import com.watabou.noosa.Group;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.ui.Component;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 
 public class WndHero extends WndTabbed {
@@ -62,6 +69,54 @@ public class WndHero extends WndTabbed {
 	private BuffsTab buffs;
 
 	public static int lastIdx = 0;
+
+	public WndHero(int id, @NotNull JSONObject args) {
+		super();
+		setId(id);
+		resize(WIDTH, HEIGHT);
+
+		RemoteStatsTab remoteStats = new RemoteStatsTab(args);
+		add(remoteStats);
+		remoteStats.setRect(0, 0, WIDTH, HEIGHT);
+
+		RemoteTalentsTab remoteTalents = new RemoteTalentsTab(args.optJSONArray("talent_tiers"));
+		add(remoteTalents);
+		remoteTalents.setRect(0, 0, WIDTH, HEIGHT);
+
+		RemoteBuffsTab remoteBuffs = new RemoteBuffsTab(args.optJSONArray("buffs"));
+		add(remoteBuffs);
+		remoteBuffs.setRect(0, 0, WIDTH, HEIGHT);
+
+		add(new IconTab(Icons.get(Icons.RANKINGS)) {
+			@Override
+			protected void select(boolean value) {
+				super.select(value);
+				remoteStats.visible = remoteStats.active = selected;
+			}
+		});
+		add(new IconTab(Icons.get(Icons.TALENT)) {
+			@Override
+			protected void select(boolean value) {
+				super.select(value);
+				remoteTalents.visible = remoteTalents.active = selected;
+			}
+		});
+		add(new IconTab(Icons.get(Icons.BUFFS)) {
+			@Override
+			protected void select(boolean value) {
+				super.select(value);
+				remoteBuffs.visible = remoteBuffs.active = selected;
+			}
+		});
+
+		layoutTabs();
+		int selectedTab = args.optInt("selected_tab", 0);
+		if (selectedTab >= 0 && selectedTab < tabs.size()) {
+			select(selectedTab);
+		} else {
+			select(0);
+		}
+	}
 
 	public WndHero() {
 		
@@ -243,6 +298,160 @@ public class WndHero extends WndTabbed {
 		
 		public float height() {
 			return pos;
+		}
+	}
+
+	private static class RemoteStatsTab extends Component {
+
+		private static final int GAP = 6;
+
+		private final @NotNull JSONObject args;
+		private float pos;
+
+		private RemoteStatsTab(@NotNull JSONObject args) {
+			super();
+			this.args = args;
+		}
+
+		@Override
+		protected void createChildren() {
+			super.createChildren();
+
+			IconTitle title = new IconTitle();
+			title.icon(Icons.get(Icons.RANKINGS));
+			JSONObject ownerHero = args.optJSONObject("owner_hero");
+			String name = ownerHero == null ? JsonStringHelper.optString(args, "title", "") : JsonStringHelper.optString(ownerHero, "name", "");
+			String className = ownerHero == null ? JsonStringHelper.optString(args, "hero_class", "") : JsonStringHelper.optString(ownerHero, "class", "");
+			title.label((name.isEmpty() ? className : name + "\n" + className).toUpperCase(Locale.ENGLISH));
+			title.color(Window.TITLE_COLOR);
+			title.setRect(0, 0, WIDTH, 0);
+			add(title);
+
+			pos = title.bottom() + 2 * GAP;
+			JSONArray stats = args.optJSONArray("stats");
+			if (stats != null) {
+				for (int i = 0; i < stats.length(); i++) {
+					JSONObject stat = stats.getJSONObject(i);
+					statSlot(JsonStringHelper.getString(stat, "label"), String.valueOf(stat.get("value")));
+				}
+			}
+		}
+
+		private void statSlot(@NotNull String label, @NotNull String value) {
+			RenderedTextBlock txt = PixelScene.renderTextBlock(label, 8);
+			txt.maxWidth((int)(WIDTH * 0.55f));
+			txt.setPos(0, pos + (6 - txt.height()) / 2);
+			PixelScene.align(txt);
+			add(txt);
+
+			txt = PixelScene.renderTextBlock(value, 8);
+			txt.maxWidth((int)(WIDTH * 0.45f));
+			txt.setPos(WIDTH * 0.55f, pos + (6 - txt.height()) / 2);
+			PixelScene.align(txt);
+			add(txt);
+
+			pos += GAP + txt.height();
+		}
+	}
+
+	private static class RemoteTalentsTab extends Component {
+
+		private final @NotNull JSONArray tiers;
+		private TalentsPane pane;
+
+		private RemoteTalentsTab(@Nullable JSONArray tiers) {
+			super();
+			this.tiers = tiers == null ? new JSONArray() : tiers;
+		}
+
+		@Override
+		protected void createChildren() {
+			super.createChildren();
+			pane = new TalentsPane(TalentButton.Mode.INFO, parseTalents(tiers));
+			add(pane);
+		}
+
+		@Override
+		protected void layout() {
+			super.layout();
+			pane.setRect(x, y, width, height);
+		}
+
+		private static @NotNull ArrayList<LinkedHashMap<Talent, Integer>> parseTalents(@NotNull JSONArray tiers) {
+			ArrayList<LinkedHashMap<Talent, Integer>> result = new ArrayList<>();
+			for (int i = 0; i < tiers.length(); i++) {
+				JSONObject tier = tiers.getJSONObject(i);
+				LinkedHashMap<Talent, Integer> talents = new LinkedHashMap<>();
+				JSONArray talentArray = tier.optJSONArray("talents");
+				if (talentArray != null) {
+					for (int j = 0; j < talentArray.length(); j++) {
+						JSONObject talent = talentArray.getJSONObject(j);
+						talents.put(Talent.valueOf(JsonStringHelper.getString(talent, "id")), talent.optInt("points", 0));
+					}
+				}
+				result.add(talents);
+			}
+			return result;
+		}
+	}
+
+	private static class RemoteBuffsTab extends Component {
+
+		private final @NotNull JSONArray buffs;
+		private ScrollPane buffList;
+		private float pos;
+
+		private RemoteBuffsTab(@Nullable JSONArray buffs) {
+			super();
+			this.buffs = buffs == null ? new JSONArray() : buffs;
+		}
+
+		@Override
+		protected void createChildren() {
+			super.createChildren();
+			buffList = new ScrollPane(new Component());
+			add(buffList);
+			Component content = buffList.content();
+			for (int i = 0; i < buffs.length(); i++) {
+				JSONObject buff = buffs.getJSONObject(i);
+				RemoteBuffSlot slot = new RemoteBuffSlot(buff);
+				slot.setRect(0, pos, WIDTH, 18);
+				content.add(slot);
+				pos += 2 + slot.height();
+			}
+			content.setSize(WIDTH, pos);
+		}
+
+		@Override
+		protected void layout() {
+			super.layout();
+			buffList.setRect(0, 0, width, height);
+		}
+	}
+
+	private static class RemoteBuffSlot extends Component {
+
+		private final @NotNull JSONObject buff;
+		private RenderedTextBlock txt;
+
+		private RemoteBuffSlot(@NotNull JSONObject buff) {
+			super();
+			this.buff = buff;
+		}
+
+		@Override
+		protected void createChildren() {
+			super.createChildren();
+			txt = PixelScene.renderTextBlock(JsonStringHelper.getString(buff, "name"), 8);
+			add(txt);
+		}
+
+		@Override
+		protected void layout() {
+			super.layout();
+			txt.maxWidth((int)width);
+			txt.setPos(x, y + (height - txt.height()) / 2f);
+			PixelScene.align(txt);
 		}
 	}
 

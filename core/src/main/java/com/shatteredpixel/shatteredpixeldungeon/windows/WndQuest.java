@@ -26,7 +26,6 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
 import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.GhostSprite;
 import com.watabou.utils.Reflection;
 import org.json.JSONObject;
 
@@ -37,12 +36,12 @@ public class WndQuest extends WndTitledMessage {
 	}
 	public WndQuest(int id, JSONObject object) {
 		super((CharSprite) Reflection.newInstance(Reflection.forName(JsonStringHelper.getString(object, "sprite_name"))), Messages.titleCase(JsonStringHelper.getString(object, "char_name")), JsonStringHelper.getString(object, "text"));
-		this.id = id;
+		this.setId(id);
     }
 
 	@Override
 	public void hide() {
-		SendData.sendWindowResult(id, -1);
+		SendData.sendWindowResult(getId(), -1);
 		super.hide();
 	}
 }

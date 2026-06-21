@@ -72,7 +72,7 @@ public class SentryRoom {
 		public void link(Char ch) {
 			super.link(ch);
 
-			chargeParticles = centerEmitter();
+//			chargeParticles = centerEmitter();
 			if(chargeParticles != null) {
 				chargeParticles.autoKill = false;
 				chargeParticles.pour(MagicMissile.MagicParticle.ATTRACTING, 0.05f);

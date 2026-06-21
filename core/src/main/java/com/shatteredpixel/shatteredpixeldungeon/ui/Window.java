@@ -38,9 +38,15 @@ import com.watabou.utils.PlatformSupport;
 import com.watabou.utils.Point;
 import com.watabou.utils.RectF;
 import com.watabou.utils.Signal;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Window extends Group implements Signal.Listener<KeyEvent> {
-	public int id = -1;
+	private int id = -1;
+	private static final Map<Integer, Window> windowMap = new HashMap<>();
+
 	protected int width;
 	protected int height;
 
@@ -194,6 +200,7 @@ public class Window extends Group implements Signal.Listener<KeyEvent> {
 		if (parent != null) {
 			parent.erase(this);
 		}
+		setId(-1);
 		destroy();
 	}
 	
@@ -218,10 +225,26 @@ public class Window extends Group implements Signal.Listener<KeyEvent> {
 	}
 	
 	public void onBackPressed() {
-		if (id >= 0) {
-			SendData.sendWindowResult(id, -1);
+		if (getId() >= 0) {
+			SendData.sendWindowResult(getId(), -1);
 		}
 		hide();
 	}
 
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		if (id >= 0) {
+			windowMap.put(id, this);
+		} else {
+			windowMap.remove(this.id);
+		}
+		this.id = id;
+	}
+
+	public static @Nullable Window getWindow(int id) {
+		return windowMap.get(id);
+	}
 }

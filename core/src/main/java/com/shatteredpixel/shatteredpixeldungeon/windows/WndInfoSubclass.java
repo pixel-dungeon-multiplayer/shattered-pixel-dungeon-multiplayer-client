@@ -25,14 +25,40 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
+import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TalentButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TalentsPane;
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 public class WndInfoSubclass extends WndTitledMessage {
+
+	public WndInfoSubclass(int id, @NotNull JSONObject args) {
+		super(new IconTitle(Icons.get(Icons.TALENT), JsonStringHelper.getString(args, "title")), JsonStringHelper.getString(args, "description"));
+		setId(id);
+
+		LinkedHashMap<Talent, Integer> talents = new LinkedHashMap<>();
+		JSONArray talentArray = args.optJSONArray("talents");
+		if (talentArray != null) {
+			for (int i = 0; i < talentArray.length(); i++) {
+				JSONObject talent = talentArray.getJSONObject(i);
+				talents.put(Talent.valueOf(JsonStringHelper.getString(talent, "id")), talent.optInt("points", 0));
+			}
+		}
+		if (!talents.isEmpty()) {
+			TalentsPane.TalentTierPane talentPane = new TalentsPane.TalentTierPane(talents, 3, TalentButton.Mode.INFO);
+			talentPane.title.text(Messages.titleCase(Messages.get(WndHeroInfo.class, "talents")));
+			talentPane.setRect(0, height + 5, width, talentPane.height());
+			add(talentPane);
+			resize(width, (int)talentPane.bottom());
+		}
+	}
 
 	public WndInfoSubclass(HeroClass cls, HeroSubClass subCls){
 		super( new HeroIcon(subCls), Messages.titleCase(subCls.title()), subCls.desc());
