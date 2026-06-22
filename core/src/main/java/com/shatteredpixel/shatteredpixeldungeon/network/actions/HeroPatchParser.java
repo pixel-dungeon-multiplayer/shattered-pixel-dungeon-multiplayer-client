@@ -1,22 +1,18 @@
 package com.shatteredpixel.shatteredpixeldungeon.network.actions;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.CustomHeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.CustomHeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.CustomTalent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.TalentCache;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Challenge;
-import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
 import com.shatteredpixel.shatteredpixeldungeon.network.ParseThread;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
@@ -45,9 +41,8 @@ public class HeroPatchParser implements ActionParser {
                     break;
                 }
                 case "class": {
-                    String className = JsonStringHelper.getString(heroObj, token);
-                    className = className.toUpperCase();
-                    hero.heroClass = HeroClass.valueOf(className);
+                    hero.heroClass = CustomHeroClass.fromJson(heroObj.getJSONObject(token));
+                    hero.talents = copyTalentTiers(hero.heroClass.talentTiers());
                     if (hero.sprite instanceof HeroSprite) {
                         ((HeroSprite) hero.sprite).disguise(hero.heroClass);
                     }
@@ -56,29 +51,37 @@ public class HeroPatchParser implements ActionParser {
 
 
                 case "talents": {
-                    if (hero.talents.size() < 4) { //todo check this trash
-                        Talent.initClassTalents(hero);
-                    }
                     JSONArray talentsArray = heroObj.getJSONArray("talents");
                     for (int i = 0; i < talentsArray.length(); i++) {
+                        while (hero.talents.size() <= i) {
+                            hero.talents.add(new LinkedHashMap<>());
+                        }
                         JSONArray talentRow = talentsArray.getJSONArray(i);
                         LinkedHashMap<Talent, Integer> talentIntMap = new LinkedHashMap<>();
                         for (int index = 0; index < talentRow.length(); index++) {
                             JSONObject talentObject = talentRow.getJSONObject(index);
                             int points = talentObject.getInt("points");
-                            int icon = talentObject.getInt("icon");
-                            Talent talent = TalentCache.talentByIcon(icon);
+                            Talent talent = CustomTalent.fromJson(talentObject);
                             talentIntMap.put(talent, points);
                         }
                         hero.talents.set(i, talentIntMap);
                     }
                     break;
                 }
-                case "subclass_id": {
-                    hero.subClass = HeroSubClass.values()[heroObj.getInt(token)];
+                case "subclass": {
+                    hero.subClass = CustomHeroSubClass.fromJson(heroObj.getJSONObject(token));
                     break;
                 }
             }
         }
+    }
+
+    private static @org.jetbrains.annotations.NotNull ArrayList<LinkedHashMap<Talent, Integer>> copyTalentTiers(
+            @org.jetbrains.annotations.NotNull ArrayList<LinkedHashMap<Talent, Integer>> source) {
+        ArrayList<LinkedHashMap<Talent, Integer>> result = new ArrayList<>();
+        for (LinkedHashMap<Talent, Integer> tier : source) {
+            result.add(new LinkedHashMap<>(tier));
+        }
+        return result;
     }
 }

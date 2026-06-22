@@ -23,7 +23,6 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.*;
 import com.shatteredpixel.shatteredpixeldungeon.items.CustomItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfIntuition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.SewerLevel;
@@ -49,7 +48,6 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.GameLog;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.utils.Log;
 import com.shatteredpixel.shatteredpixeldungeon.windows.*;
-import com.shatteredpixel.shatteredpixeldungeon.windows.legacy.WndChooseSubclass;
 import com.shatteredpixel.shatteredpixeldungeon.windows.legacy.WndQuest;
 import com.shatteredpixel.shatteredpixeldungeon.windows.legacy.WndTradeItem;
 import com.shatteredpixel.shatteredpixeldungeon.windows.legacy.WndWandmaker;
@@ -589,9 +587,6 @@ public class ParseThread implements Callable<String> {
                 case "sad_ghost":
                     GameScene.show(new WndSadGhost(id, windowObj.getJSONObject("args")));
                     break;
-                case "choose_subclass":
-                    GameScene.show(new WndChooseSubclass(windowObj));
-                    break;
                 case "wandmaker":
                     GameScene.show(new WndWandmaker(windowObj));
                     break;
@@ -618,9 +613,6 @@ public class ParseThread implements Callable<String> {
                     break;
                 case "guess":
                     GameScene.show(new StoneOfIntuition.WndGuess(windowObj));
-                    break;
-                case "ghost_hero":
-                    GameScene.show(new DriedRose.WndGhostHero(windowObj));
                     break;
                 default: {
                     Log.e("parse_window", String.format("incorrect window type: %s", type));
@@ -1889,28 +1881,6 @@ public class ParseThread implements Callable<String> {
                         Gdx.app.log("ParseThread", "heroUUID: " + JsonStringHelper.getString(heroObj, "uuid"));
                     break;
                 }
-                case "talents" : {
-                    if (hero.talents.size() < 4) {
-                        Talent.initClassTalents(hero);
-                    }
-                    JSONArray talentsArray = heroObj.getJSONArray("talents");
-                    for (int i = 0; i < talentsArray.length(); i++) {
-                        JSONArray talentRow = talentsArray.getJSONArray(i);
-                        LinkedHashMap<Talent, Integer> talentIntMap = new LinkedHashMap<>();
-                        for (int index = 0; index < talentRow.length(); index++) {
-                            JSONObject talentObject = talentRow.getJSONObject(index);
-                            int points = talentObject.getInt("points");
-                            int icon = talentObject.getInt("icon");
-                            Talent talent = TalentCache.talentByIcon(icon);
-                            talentIntMap.put(talent, points);
-                        }
-                        hero.talents.set(i, talentIntMap);
-                    }
-                    break;
-                }
-                case "subclass_id":
-                    hero.subClass = HeroSubClass.values()[heroObj.getInt(token)];
-                    break;
                 default: {
                     GLog.n("Unexpected token \"%s\" in Hero. Ignored.", token);
                     break;

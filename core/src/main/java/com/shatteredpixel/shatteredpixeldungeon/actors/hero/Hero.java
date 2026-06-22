@@ -68,7 +68,7 @@ public class Hero extends Char {
 	private static final float TIME_TO_SEARCH = 2f;
 	private static final float HUNGER_FOR_SEARCH = 6f;
 
-	public HeroClass heroClass = HeroClass.ROGUE;
+	public HeroClass heroClass = HeroClass.NONE;
 	public HeroSubClass subClass = HeroSubClass.NONE;
 	public ArmorAbility armorAbility = null;
 	public ArrayList<LinkedHashMap<Talent, Integer>> talents = new ArrayList<>();
@@ -126,8 +126,6 @@ public class Hero extends Char {
 		info.hp = bundle.getInt(Char.TAG_HP);
 		info.ht = bundle.getInt(Char.TAG_HT);
 		info.shld = bundle.getInt(Char.TAG_SHLD);
-		info.heroClass = bundle.getEnum(CLASS, HeroClass.class);
-		info.subClass = bundle.getEnum(SUBCLASS, HeroSubClass.class);
 		Belongings.preview(info, bundle);
 	}
 
@@ -140,7 +138,7 @@ public class Hero extends Char {
 	public int pointsInTalent(Talent talent) {
 		for (LinkedHashMap<Talent, Integer> tier : talents) {
 			for (Talent f : tier.keySet()) {
-				if (f == talent) return tier.get(f);
+				if (f.equals(talent)) return tier.get(f);
 			}
 		}
 		return 0;
@@ -149,7 +147,7 @@ public class Hero extends Char {
 	public void upgradeTalent(Talent talent) {
 		for (LinkedHashMap<Talent, Integer> tier : talents) {
 			for (Talent f : tier.keySet()) {
-				if (f == talent) tier.put(talent, tier.get(talent) + 1);
+				if (f.equals(talent)) tier.put(f, tier.get(f) + 1);
 			}
 		}
 		SendData.sendTalentUpgrade(talent);
@@ -166,7 +164,7 @@ public class Hero extends Char {
 
 	public int talentPointsAvailable(int tier) {
 		if (lvl < (Talent.tierLevelThresholds[tier] - 1)
-				|| (tier == 3 && subClass == HeroSubClass.NONE)
+				|| (tier == 3 && subClass.isNone())
 				|| (tier == 4 && armorAbility == null)) {
 			return 0;
 		} else if (lvl >= Talent.tierLevelThresholds[tier + 1]) {
@@ -178,7 +176,7 @@ public class Hero extends Char {
 
 	public int bonusTalentPoints(int tier) {
 		if (lvl < (Talent.tierLevelThresholds[tier] - 1)
-				|| (tier == 3 && subClass == HeroSubClass.NONE)
+				|| (tier == 3 && subClass.isNone())
 				|| (tier == 4 && armorAbility == null)) {
 			return 0;
 		} else {
@@ -189,7 +187,7 @@ public class Hero extends Char {
 	}
 
 	public String className() {
-		return subClass == null || subClass == HeroSubClass.NONE ? heroClass.title() : subClass.title();
+		return subClass == null || subClass.isNone() ? heroClass.title() : subClass.title();
 	}
 
 	@Override
@@ -312,13 +310,7 @@ public class Hero extends Char {
 	private boolean canSelfTrample = false;
 
 	public boolean canSelfTrample() {
-		return canSelfTrample && !rooted && !flying &&
-				//standing in high grass
-				(Dungeon.level.map[pos] == Terrain.HIGH_GRASS ||
-						//standing in furrowed grass and not huntress
-						(heroClass != HeroClass.HUNTRESS && Dungeon.level.map[pos] == Terrain.FURROWED_GRASS) ||
-						//standing on a plant
-						Dungeon.level.plants.get(pos) != null);
+		return false;
 	}
 
 	//used to keep track if the wait/pickup action was used

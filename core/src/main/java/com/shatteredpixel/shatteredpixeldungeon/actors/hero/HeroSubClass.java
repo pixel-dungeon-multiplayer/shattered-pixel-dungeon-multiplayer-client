@@ -21,55 +21,67 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero;
 
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
-import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
-import com.watabou.noosa.Game;
+import org.jetbrains.annotations.NotNull;
 
-public enum HeroSubClass {
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-	NONE(HeroIcon.NONE),
+public abstract class HeroSubClass {
 
-	BERSERKER(HeroIcon.BERSERKER),
-	GLADIATOR(HeroIcon.GLADIATOR),
+	public static final @NotNull HeroSubClass NONE = new HeroSubClass("NONE", "", "", "", 0, Collections.emptyList()) {};
 
-	BATTLEMAGE(HeroIcon.BATTLEMAGE),
-	WARLOCK(HeroIcon.WARLOCK),
-	
-	ASSASSIN(HeroIcon.ASSASSIN),
-	FREERUNNER(HeroIcon.FREERUNNER),
-	
-	SNIPER(HeroIcon.SNIPER),
-	WARDEN(HeroIcon.WARDEN),
+	private final @NotNull String id;
+	private final @NotNull String title;
+	private final @NotNull String shortDesc;
+	private final @NotNull String desc;
+	private final int icon;
+	private final @NotNull List<Talent> talents;
 
-	CHAMPION(HeroIcon.CHAMPION),
-	MONK(HeroIcon.MONK),
-
-	PRIEST(HeroIcon.PRIEST),
-	PALADIN(HeroIcon.PALADIN);
-
-	int icon;
-
-	HeroSubClass(int icon){
+	protected HeroSubClass(
+			@NotNull String id,
+			@NotNull String title,
+			@NotNull String shortDesc,
+			@NotNull String desc,
+			int icon,
+			@NotNull List<Talent> talents) {
+		this.id = id;
+		this.title = title;
+		this.shortDesc = shortDesc;
+		this.desc = desc;
 		this.icon = icon;
-	}
-	
-	public String title() {
-		return Messages.get(this, name());
+		this.talents = Collections.unmodifiableList(new ArrayList<>(talents));
 	}
 
-	public String shortDesc() {
-		return Messages.get(this, name()+"_short_desc");
+	public final @NotNull String id() {
+		return id;
 	}
 
-	public String desc() {
-		//Include the staff effect description in the battlemage's desc if possible
-        return Messages.get(this, name() + "_desc");
-    }
+	public final @NotNull String name() {
+		return id;
+	}
 
-	public int icon(){
+	public final @NotNull String title() {
+		return title;
+	}
+
+	public final @NotNull String shortDesc() {
+		return shortDesc;
+	}
+
+	public final @NotNull String desc() {
+		return desc;
+	}
+
+	public final int icon() {
 		return icon;
 	}
 
+	public final @NotNull List<Talent> talents() {
+		return talents;
+	}
+
+	public final boolean isNone() {
+		return "NONE".equals(id);
+	}
 }

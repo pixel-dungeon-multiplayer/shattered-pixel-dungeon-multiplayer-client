@@ -24,7 +24,6 @@ package com.shatteredpixel.shatteredpixeldungeon.scenes;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.Ratmogrify;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.RatSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TitleBackground;
@@ -138,25 +137,25 @@ public class SurfaceScene extends PixelScene {
 			window.add( patch );
 		}
 		
-		Avatar a = new Avatar( Dungeon.hero.heroClass );
-		// Removing semitransparent contour
-		a.am = 2; a.aa = -1;
-		a.x = (SKY_WIDTH - a.width) / 2;
-		a.y = SKY_HEIGHT - a.height;
-		align(a);
-
-		if (Dungeon.hero.armorAbility instanceof Ratmogrify) {
-			rats = new Pet[30];
-			for (int i = 0; i < rats.length; i++){
-				Pet pet = new Pet();
-				pet.rm = pet.gm = pet.bm = 1.2f;
-				pet.x = Random.Int(SKY_WIDTH)-10;
-				pet.y = SKY_HEIGHT - pet.height;
-				window.add(pet);
-				rats[i] = pet;
-				if (dayTime) pet.brightness( 1.2f );
-			}
-		}
+//		Avatar a = new Avatar( Dungeon.hero.heroClass );
+//		// Removing semitransparent contour
+//		a.am = 2; a.aa = -1;
+//		a.x = (SKY_WIDTH - a.width) / 2;
+//		a.y = SKY_HEIGHT - a.height;
+//		align(a);
+//
+//		if (Dungeon.hero.armorAbility instanceof Ratmogrify) {
+//			rats = new Pet[30];
+//			for (int i = 0; i < rats.length; i++){
+//				Pet pet = new Pet();
+//				pet.rm = pet.gm = pet.bm = 1.2f;
+//				pet.x = Random.Int(SKY_WIDTH)-10;
+//				pet.y = SKY_HEIGHT - pet.height;
+//				window.add(pet);
+//				rats[i] = pet;
+//				if (dayTime) pet.brightness( 1.2f );
+//			}
+//		}
 
 		final Pet pet = new Pet();
 		pet.rm = pet.gm = pet.bm = 1.2f;
@@ -167,7 +166,7 @@ public class SurfaceScene extends PixelScene {
 
 
 
-        window.add( a );
+//        window.add( a );
 		window.add( pet );
 		
 		window.add( new PointerArea( sky ) {
@@ -190,7 +189,7 @@ public class SurfaceScene extends PixelScene {
 		add( frame );
 
 		if (dayTime) {
-			a.brightness( 1.2f );
+//			a.brightness( 1.2f );
 			pet.brightness( 1.2f );
 		} else {
 			frame.hardlight( 0xDDEEFF );
@@ -347,16 +346,16 @@ public class SurfaceScene extends PixelScene {
 		}
 	}
 
-	private static class Avatar extends Image {
-		
-		private static final int WIDTH	= 24;
-		private static final int HEIGHT	= 32;
-		
-		public Avatar( HeroClass cl ) {
-			super( Assets.Sprites.AVATARS );
-			frame( new TextureFilm( texture, WIDTH, HEIGHT ).get( cl.ordinal() ) );
-		}
-	}
+//	private static class Avatar extends Image {
+//
+//		private static final int WIDTH	= 24;
+//		private static final int HEIGHT	= 32;
+//
+//		public Avatar( HeroClass cl ) {
+//			super( Assets.Sprites.AVATARS );
+//			frame( new TextureFilm( texture, WIDTH, HEIGHT ).get( cl.ordinal() ) );
+//		}
+//	}
 	
 	private static class Pet extends RatSprite {
 		

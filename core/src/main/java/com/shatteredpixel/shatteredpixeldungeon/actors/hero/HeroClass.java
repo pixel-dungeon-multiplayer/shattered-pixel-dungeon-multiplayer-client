@@ -23,115 +23,169 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.hero;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbility;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.AscendedForm;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.PowerOfMany;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.cleric.Trinity;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Challenge;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.ElementalStrike;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Feint;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.NaturesPower;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpectralBlades;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpiritHawk;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.ElementalBlast;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.WarpBeacon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.mage.WildMagic;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.ShadowClone;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.SmokeBomb;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.HeroicLeap;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Shockwave;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import org.jetbrains.annotations.NotNull;
 
-public enum HeroClass {
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
 
-	WARRIOR( HeroSubClass.BERSERKER, HeroSubClass.GLADIATOR ),
-	MAGE( HeroSubClass.BATTLEMAGE, HeroSubClass.WARLOCK ),
-	ROGUE( HeroSubClass.ASSASSIN, HeroSubClass.FREERUNNER ),
-	HUNTRESS( HeroSubClass.SNIPER, HeroSubClass.WARDEN ),
-	DUELIST( HeroSubClass.CHAMPION, HeroSubClass.MONK ),
-	CLERIC( HeroSubClass.PRIEST, HeroSubClass.PALADIN );
+public abstract class HeroClass {
 
-	private HeroSubClass[] subClasses;
+	public static final @NotNull HeroClass NONE = new HeroClass(
+			"NONE",
+			"",
+			"",
+			"",
+			Assets.Sprites.WARRIOR,
+			"",
+			false,
+			"",
+			Collections.emptyList(),
+			Collections.emptyList(),
+			new ArrayList<java.util.LinkedHashMap<Talent, Integer>>()) {};
 
-	HeroClass( HeroSubClass...subClasses ) {
-		this.subClasses = subClasses;
+	private static final @NotNull HeroClass WARRIOR = local("WARRIOR", Assets.Sprites.WARRIOR, Assets.Splashes.WARRIOR);
+	private static final @NotNull HeroClass MAGE = local("MAGE", Assets.Sprites.MAGE, Assets.Splashes.MAGE);
+	private static final @NotNull HeroClass ROGUE = local("ROGUE", Assets.Sprites.ROGUE, Assets.Splashes.ROGUE);
+	private static final @NotNull HeroClass HUNTRESS = local("HUNTRESS", Assets.Sprites.HUNTRESS, Assets.Splashes.HUNTRESS);
+	private static final @NotNull HeroClass DUELIST = local("DUELIST", Assets.Sprites.DUELIST, Assets.Splashes.DUELIST);
+	private static final @NotNull HeroClass CLERIC = local("CLERIC", Assets.Sprites.CLERIC, Assets.Splashes.CLERIC);
+	private static final @NotNull HeroClass[] VALUES = new HeroClass[]{WARRIOR, MAGE, ROGUE, HUNTRESS, DUELIST, CLERIC};
+	private static final @NotNull LinkedHashMap<String, HeroClass> REGISTRY = new LinkedHashMap<>();
+
+	static {
+		REGISTRY.put(NONE.id(), NONE);
+		for (HeroClass heroClass : VALUES) {
+			REGISTRY.put(heroClass.id(), heroClass);
+		}
 	}
 
-	public String title() {
-		return Messages.get(HeroClass.class, name());
+	private final @NotNull String id;
+	private final @NotNull String title;
+	private final @NotNull String shortDesc;
+	private final @NotNull String desc;
+	private final @NotNull String spritesheet;
+	private final @NotNull String splashArt;
+	private final boolean unlocked;
+	private final @NotNull String unlockMsg;
+	private final @NotNull List<HeroSubClass> subClasses;
+	private final @NotNull List<ArmorAbility> armorAbilities;
+	private final @NotNull ArrayList<java.util.LinkedHashMap<Talent, Integer>> talentTiers;
+
+	protected HeroClass(
+			@NotNull String id,
+			@NotNull String title,
+			@NotNull String shortDesc,
+			@NotNull String desc,
+			@NotNull String spritesheet,
+			@NotNull String splashArt,
+			boolean unlocked,
+			@NotNull String unlockMsg,
+			@NotNull List<HeroSubClass> subClasses,
+			@NotNull List<ArmorAbility> armorAbilities,
+			@NotNull ArrayList<java.util.LinkedHashMap<Talent, Integer>> talentTiers) {
+		this.id = id;
+		this.title = title;
+		this.shortDesc = shortDesc;
+		this.desc = desc;
+		this.spritesheet = spritesheet;
+		this.splashArt = splashArt;
+		this.unlocked = unlocked;
+		this.unlockMsg = unlockMsg;
+		this.subClasses = Collections.unmodifiableList(new ArrayList<>(subClasses));
+		this.armorAbilities = Collections.unmodifiableList(new ArrayList<>(armorAbilities));
+		this.talentTiers = talentTiers;
 	}
 
-	public String desc(){
-		return Messages.get(HeroClass.class, name()+"_desc");
+	private static @NotNull HeroClass local(@NotNull String id, @NotNull String spritesheet, @NotNull String splashArt) {
+		return new HeroClass(
+				id,
+				Messages.get(HeroClass.class, id),
+				Messages.get(HeroClass.class, id + "_desc_short"),
+				Messages.get(HeroClass.class, id + "_desc"),
+				spritesheet,
+				splashArt,
+				true,
+				Messages.get(HeroClass.class, id + "_desc_short") + "\n\n" + Messages.get(HeroClass.class, id + "_unlock"),
+				Collections.emptyList(),
+				Collections.emptyList(),
+				new ArrayList<java.util.LinkedHashMap<Talent, Integer>>()) {};
 	}
 
-	public String shortDesc(){
-		return Messages.get(HeroClass.class, name()+"_desc_short");
+	public static @NotNull HeroClass[] values() {
+		return VALUES.clone();
 	}
 
-	public HeroSubClass[] subClasses() {
+	public static @NotNull HeroClass valueOf(@NotNull String id) {
+		HeroClass heroClass = REGISTRY.get(id.toUpperCase(Locale.ENGLISH));
+		if (heroClass == null) {
+			throw new IllegalArgumentException("Unknown hero class: " + id);
+		}
+		return heroClass;
+	}
+
+	public static @NotNull HeroClass defaultClass() {
+		return ROGUE;
+	}
+
+	public final @NotNull String id() {
+		return id;
+	}
+
+	public final @NotNull String name() {
+		return id;
+	}
+
+	public final @NotNull String title() {
+		return title;
+	}
+
+	public final @NotNull String desc() {
+		return desc;
+	}
+
+	public final @NotNull String shortDesc() {
+		return shortDesc;
+	}
+
+	public final @NotNull List<HeroSubClass> subClasses() {
 		return subClasses;
 	}
 
-	public ArmorAbility[] armorAbilities(){
-		switch (this) {
-			case WARRIOR: default:
-				return new ArmorAbility[]{new HeroicLeap(), new Shockwave(), new Endure()};
-			case MAGE:
-				return new ArmorAbility[]{new ElementalBlast(), new WildMagic(), new WarpBeacon()};
-			case ROGUE:
-				return new ArmorAbility[]{new SmokeBomb(), new DeathMark(), new ShadowClone()};
-			case HUNTRESS:
-				return new ArmorAbility[]{new SpectralBlades(), new NaturesPower(), new SpiritHawk()};
-			case DUELIST:
-				return new ArmorAbility[]{new Challenge(), new ElementalStrike(), new Feint()};
-			case CLERIC:
-				return new ArmorAbility[]{new AscendedForm(), new Trinity(), new PowerOfMany()};
-		}
+	public final @NotNull List<ArmorAbility> armorAbilities() {
+		return armorAbilities;
 	}
 
-	public String spritesheet() {
-		switch (this) {
-			case WARRIOR: default:
-				return Assets.Sprites.WARRIOR;
-			case MAGE:
-				return Assets.Sprites.MAGE;
-			case ROGUE:
-				return Assets.Sprites.ROGUE;
-			case HUNTRESS:
-				return Assets.Sprites.HUNTRESS;
-			case DUELIST:
-				return Assets.Sprites.DUELIST;
-			case CLERIC:
-				return Assets.Sprites.CLERIC;
-		}
+	public final @NotNull ArrayList<java.util.LinkedHashMap<Talent, Integer>> talentTiers() {
+		return talentTiers;
 	}
 
-	public String splashArt(){
-		switch (this) {
-			case WARRIOR: default:
-				return Assets.Splashes.WARRIOR;
-			case MAGE:
-				return Assets.Splashes.MAGE;
-			case ROGUE:
-				return Assets.Splashes.ROGUE;
-			case HUNTRESS:
-				return Assets.Splashes.HUNTRESS;
-			case DUELIST:
-				return Assets.Splashes.DUELIST;
-			case CLERIC:
-				return Assets.Splashes.CLERIC;
-		}
+	public final @NotNull String spritesheet() {
+		return spritesheet;
 	}
 
-	// All hero classes unloked by default
-	public boolean isUnlocked(){
-		return true;
-	}
-	
-	public String unlockMsg() {
-		return shortDesc() + "\n\n" + Messages.get(HeroClass.class, name()+"_unlock");
+	public final @NotNull String splashArt() {
+		return splashArt;
 	}
 
+	public final boolean isUnlocked() {
+		return unlocked;
+	}
+
+	public final @NotNull String unlockMsg() {
+		return unlockMsg;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof HeroClass && id.equals(((HeroClass) obj).id);
+	}
+
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
 }

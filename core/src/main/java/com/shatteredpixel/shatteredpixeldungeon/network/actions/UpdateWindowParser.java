@@ -15,6 +15,9 @@ import org.json.JSONObject;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfMetamorphosis;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfIntuition;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 
 public class UpdateWindowParser implements ActionParser {
@@ -139,7 +142,11 @@ public class UpdateWindowParser implements ActionParser {
                 }
             }
         } catch (NullPointerException e) {
-            Log.e("parse_window", String.format("bad_window. %s", e.getMessage()));
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            String sStackTrace = sw.toString(); // stack trace as a string
+            Log.e("parse_window", String.format("bad_window. %s\n%s", e.getMessage(), sStackTrace));
         }
     }
 }

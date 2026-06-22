@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.CustomTalent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
@@ -46,6 +47,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class WndHeroInfo extends WndTabbed {
 
@@ -58,16 +60,17 @@ public class WndHeroInfo extends WndTabbed {
 	private static int MIN_HEIGHT = 125;
 	private static int MARGIN = 2;
 
-	public WndHeroInfo(int id, @NotNull JSONObject args) {
+    public WndHeroInfo(int id, JSONObject args) {
 		super();
 		setId(id);
+		JSONObject safeArgs = args == null ? new JSONObject() : args;
 		int finalHeight = MIN_HEIGHT;
 
-		RemoteHeroInfoTab remoteHeroInfo = new RemoteHeroInfoTab(args);
+		RemoteHeroInfoTab remoteHeroInfo = new RemoteHeroInfoTab(safeArgs);
 		add(remoteHeroInfo);
 		remoteHeroInfo.setSize(WIDTH, MIN_HEIGHT);
 		finalHeight = (int)Math.max(finalHeight, remoteHeroInfo.height());
-		add(new IconTab(heroClassIcon(JsonStringHelper.getString(args, "hero_class"))) {
+		add(new IconTab(heroClassIcon(JsonStringHelper.getString(safeArgs, "hero_class"))) {
 			@Override
 			protected void select(boolean value) {
 				super.select(value);
@@ -75,7 +78,7 @@ public class WndHeroInfo extends WndTabbed {
 			}
 		});
 
-		RemoteTalentInfoTab remoteTalentInfo = new RemoteTalentInfoTab(args.optJSONArray("talent_tiers"));
+		RemoteTalentInfoTab remoteTalentInfo = new RemoteTalentInfoTab(safeArgs.optJSONArray("talent_tiers"));
 		add(remoteTalentInfo);
 		remoteTalentInfo.setSize(WIDTH, MIN_HEIGHT);
 		finalHeight = (int)Math.max(finalHeight, remoteTalentInfo.height());
@@ -87,8 +90,8 @@ public class WndHeroInfo extends WndTabbed {
 			}
 		});
 
-		if (args.optBoolean("subclass_unlocked", false)) {
-			RemoteTextListTab subclasses = new RemoteTextListTab(Messages.titleCase(Messages.get(WndHeroInfo.class, "subclasses")), args.optJSONArray("subclasses"), "title", "short_description");
+		if (safeArgs.optBoolean("subclass_unlocked", false)) {
+			RemoteTextListTab subclasses = new RemoteTextListTab(Messages.titleCase(Messages.get(WndHeroInfo.class, "subclasses")), safeArgs.optJSONArray("subclasses"), "title", "short_description");
 			add(subclasses);
 			subclasses.setSize(WIDTH, MIN_HEIGHT);
 			finalHeight = (int)Math.max(finalHeight, subclasses.height());
@@ -101,8 +104,8 @@ public class WndHeroInfo extends WndTabbed {
 			});
 		}
 
-		if (args.optBoolean("ability_unlocked", false)) {
-			RemoteTextListTab abilities = new RemoteTextListTab(Messages.titleCase(Messages.get(WndHeroInfo.class, "abilities")), args.optJSONArray("abilities"), "name", "short_description");
+		if (safeArgs.optBoolean("ability_unlocked", false)) {
+			RemoteTextListTab abilities = new RemoteTextListTab(Messages.titleCase(Messages.get(WndHeroInfo.class, "abilities")), safeArgs.optJSONArray("abilities"), "name", "short_description");
 			add(abilities);
 			abilities.setSize(WIDTH, MIN_HEIGHT);
 			finalHeight = (int)Math.max(finalHeight, abilities.height());
@@ -127,18 +130,17 @@ public class WndHeroInfo extends WndTabbed {
 
 	private static @NotNull Image heroClassIcon(@NotNull String heroClass) {
 		try {
-			switch (HeroClass.valueOf(heroClass)) {
-				case MAGE:
+			switch (HeroClass.valueOf(heroClass).id()) {
+				case "MAGE":
 					return new ItemSprite(ItemSpriteSheet.MAGES_STAFF, null);
-				case ROGUE:
+				case "ROGUE":
 					return new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK, null);
-				case HUNTRESS:
+				case "HUNTRESS":
 					return new ItemSprite(ItemSpriteSheet.SPIRIT_BOW, null);
-				case DUELIST:
+				case "DUELIST":
 					return new ItemSprite(ItemSpriteSheet.RAPIER, null);
-				case CLERIC:
+				case "CLERIC":
 					return new ItemSprite(ItemSpriteSheet.ARTIFACT_TOME, null);
-				case WARRIOR:
 				default:
 					return new ItemSprite(ItemSpriteSheet.SEAL, null);
 			}
@@ -147,26 +149,27 @@ public class WndHeroInfo extends WndTabbed {
 		}
 	}
 
+	//catalog-only. Do not use in game!
 	public WndHeroInfo( HeroClass cl ){
 
 		Image tabIcon;
-		switch (cl){
-			case WARRIOR: default:
+		switch (cl.id()){
+			case "WARRIOR": default:
 				tabIcon = new ItemSprite(ItemSpriteSheet.SEAL, null);
 				break;
-			case MAGE:
+			case "MAGE":
 				tabIcon = new ItemSprite(ItemSpriteSheet.MAGES_STAFF, null);
 				break;
-			case ROGUE:
+			case "ROGUE":
 				tabIcon = new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK, null);
 				break;
-			case HUNTRESS:
+			case "HUNTRESS":
 				tabIcon = new ItemSprite(ItemSpriteSheet.SPIRIT_BOW, null);
 				break;
-			case DUELIST:
+			case "DUELIST":
 				tabIcon = new ItemSprite(ItemSpriteSheet.RAPIER, null);
 				break;
-			case CLERIC:
+			case "CLERIC":
 				tabIcon = new ItemSprite(ItemSpriteSheet.ARTIFACT_TOME, null);
 				break;
 		}
@@ -367,7 +370,7 @@ public class WndHeroInfo extends WndTabbed {
 			if (talentArray != null) {
 				for (int j = 0; j < talentArray.length(); j++) {
 					JSONObject talent = talentArray.getJSONObject(j);
-					talents.put(Talent.valueOf(JsonStringHelper.getString(talent, "id")), talent.optInt("points", 0));
+					talents.put(CustomTalent.fromJson(talent), talent.optInt("points", 0));
 				}
 			}
 			result.add(talents);
@@ -375,6 +378,7 @@ public class WndHeroInfo extends WndTabbed {
 		return result;
 	}
 
+	//catalog-only. Do not use in game!
 	private static class HeroInfoTab extends Component {
 
 		private RenderedTextBlock title;
@@ -396,36 +400,36 @@ public class WndHeroInfo extends WndTabbed {
 				add(info[i]);
 			}
 
-			switch (cls){
-				case WARRIOR: default:
+			switch (cls.id()){
+				case "WARRIOR": default:
 					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.SEAL),
 							new ItemSprite(ItemSpriteSheet.WORN_SHORTSWORD),
 							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
 					break;
-				case MAGE:
+				case "MAGE":
 					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.MAGES_STAFF),
 							new ItemSprite(ItemSpriteSheet.WAND_MAGIC_MISSILE),
 							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
 					break;
-				case ROGUE:
+				case "ROGUE":
 					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK),
 							Icons.get(Icons.STAIRS),
 							new ItemSprite(ItemSpriteSheet.DAGGER),
 							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
 					break;
-				case HUNTRESS:
+				case "HUNTRESS":
 					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.SPIRIT_BOW),
 							Icons.GRASS.get(),
 							new ItemSprite(ItemSpriteSheet.GLOVES),
 							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
 					break;
-				case DUELIST:
+				case "DUELIST":
 					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.RAPIER),
 							new ItemSprite(ItemSpriteSheet.WAR_HAMMER),
 							new ItemSprite(ItemSpriteSheet.THROWING_SPIKE),
 							new ItemSprite(ItemSpriteSheet.SCROLL_ISAZ)};
 					break;
-				case CLERIC:
+				case "CLERIC":
 					icons = new Image[]{ new ItemSprite(ItemSpriteSheet.ARTIFACT_TOME),
 							Icons.TALENT.get(),
 							new ItemSprite(ItemSpriteSheet.CUDGEL),
@@ -462,6 +466,7 @@ public class WndHeroInfo extends WndTabbed {
 		}
 	}
 
+	//catalog-only. Do not use in game!
 	private static class TalentInfoTab extends Component {
 
 		private RenderedTextBlock title;
@@ -478,8 +483,12 @@ public class WndHeroInfo extends WndTabbed {
 			add(message);
 
 			ArrayList<LinkedHashMap<Talent, Integer>> talents = new ArrayList<>();
-			Talent.initClassTalents(cls, talents);
-			talents.get(2).clear(); //we show T3 talents with subclasses
+			for (LinkedHashMap<Talent, Integer> tier : cls.talentTiers()) {
+				talents.add(new LinkedHashMap<>(tier));
+			}
+			if (talents.size() > 2) {
+				talents.get(2).clear(); //we show T3 talents with subclasses
+			}
 
 			talentPane = new TalentsPane(TalentButton.Mode.INFO, talents);
 			add(talentPane);
@@ -499,6 +508,7 @@ public class WndHeroInfo extends WndTabbed {
 		}
 	}
 
+	//catalog-only. Do not use in game!
 	private static class SubclassInfoTab extends Component {
 
 		private RenderedTextBlock title;
@@ -515,18 +525,19 @@ public class WndHeroInfo extends WndTabbed {
 			message = PixelScene.renderTextBlock(Messages.get(WndHeroInfo.class, "subclasses_msg"), 6);
 			add(message);
 
-			HeroSubClass[] subClasses = cls.subClasses();
+			List<HeroSubClass> subClasses = cls.subClasses();
 
-			subClsDescs = new RenderedTextBlock[subClasses.length];
-			subClsInfos = new IconButton[subClasses.length];
+			subClsDescs = new RenderedTextBlock[subClasses.size()];
+			subClsInfos = new IconButton[subClasses.size()];
 
-			for (int i = 0; i < subClasses.length; i++){
-				subClsDescs[i] = PixelScene.renderTextBlock(subClasses[i].shortDesc(), 6);
+			for (int i = 0; i < subClasses.size(); i++){
+				HeroSubClass subClass = subClasses.get(i);
+				subClsDescs[i] = PixelScene.renderTextBlock(subClass.shortDesc(), 6);
 				int finalI = i;
 				subClsInfos[i] = new IconButton( Icons.get(Icons.INFO) ){
 					@Override
 					protected void onClick() {
-						Game.scene().addToFront(new WndInfoSubclass(cls, subClasses[finalI]));
+						Game.scene().addToFront(new WndInfoSubclass(cls, subClasses.get(finalI)));
 					}
 				};
 				add(subClsDescs[i]);
@@ -559,6 +570,7 @@ public class WndHeroInfo extends WndTabbed {
 		}
 	}
 
+	//catalog-only. Do not use in game!
 	private static class ArmorAbilityInfoTab extends Component {
 
 		private RenderedTextBlock title;
@@ -575,18 +587,19 @@ public class WndHeroInfo extends WndTabbed {
 			message = PixelScene.renderTextBlock(Messages.get(WndHeroInfo.class, "abilities_msg"), 6);
 			add(message);
 
-			ArmorAbility[] abilities = cls.armorAbilities();
+			List<ArmorAbility> abilities = cls.armorAbilities();
 
-			abilityDescs = new RenderedTextBlock[abilities.length];
-			abilityInfos = new IconButton[abilities.length];
+			abilityDescs = new RenderedTextBlock[abilities.size()];
+			abilityInfos = new IconButton[abilities.size()];
 
-			for (int i = 0; i < abilities.length; i++){
-				abilityDescs[i] = PixelScene.renderTextBlock(abilities[i].shortDesc(), 6);
+			for (int i = 0; i < abilities.size(); i++){
+				ArmorAbility ability = abilities.get(i);
+				abilityDescs[i] = PixelScene.renderTextBlock(ability.shortDesc(), 6);
 				int finalI = i;
 				abilityInfos[i] = new IconButton( Icons.get(Icons.INFO) ){
 					@Override
 					protected void onClick() {
-						Game.scene().addToFront(new WndInfoArmorAbility(cls, abilities[finalI]));
+						Game.scene().addToFront(new WndInfoArmorAbility(cls, abilities.get(finalI)));
 					}
 				};
 				add(abilityDescs[i]);

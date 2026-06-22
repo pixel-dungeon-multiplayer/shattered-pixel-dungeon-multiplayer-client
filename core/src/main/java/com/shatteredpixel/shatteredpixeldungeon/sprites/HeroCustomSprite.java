@@ -32,7 +32,7 @@ import com.watabou.utils.RectF;
 
 public class HeroCustomSprite extends CharSprite implements TieredSprite, ClassSprite{
     private int tier = 1;
-    private HeroClass heroClass = HeroClass.ROGUE;
+    private HeroClass heroClass = HeroClass.NONE;
     private static final int FRAME_WIDTH	= 12;
     private static final int FRAME_HEIGHT	= 15;
 

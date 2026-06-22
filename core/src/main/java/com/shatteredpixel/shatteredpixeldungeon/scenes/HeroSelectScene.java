@@ -577,7 +577,7 @@ public class HeroSelectScene extends PixelScene {
 		@Override
 		public void update() {
 			super.update();
-			if (cl != GamesInProgress.selectedClass){
+			if (!cl.equals(GamesInProgress.selectedClass)){
 				if (!cl.isUnlocked()){
 					icon.brightness(0.1f);
 				} else {
@@ -594,7 +594,7 @@ public class HeroSelectScene extends PixelScene {
 
 			if( !cl.isUnlocked() ){
 				ShatteredPixelDungeon.scene().addToFront( new WndMessage(cl.unlockMsg()));
-			} else if (GamesInProgress.selectedClass == cl) {
+			} else if (cl.equals(GamesInProgress.selectedClass)) {
 				Window w = new WndHeroInfo(cl);
 				if (landscape()){
 					w.offset(Camera.main.width/6, 0);

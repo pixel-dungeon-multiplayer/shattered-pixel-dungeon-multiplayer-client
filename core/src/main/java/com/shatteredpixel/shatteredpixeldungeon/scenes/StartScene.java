@@ -337,7 +337,7 @@ public class StartScene extends PixelScene {
 	}
 	public static void startNewGame() {
 		Dungeon.hero = null;
-		SPDSettings.lastClass(GamesInProgress.selectedClass.ordinal());
+		SPDSettings.lastClass(0);
 		InterlevelScene.first_descend = true;
 		InterlevelScene.mode = InterlevelScene.Mode.DESCEND;
 		Game.switchScene( InterlevelScene.class );

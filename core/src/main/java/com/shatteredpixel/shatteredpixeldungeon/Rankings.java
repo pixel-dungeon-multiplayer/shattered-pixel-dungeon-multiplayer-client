@@ -119,7 +119,6 @@ public enum Rankings {
 			customSeed  = bundle.getString( SEED );
 			daily       = bundle.getBoolean( DAILY );
 
-			heroClass	= bundle.getEnum( CLASS, HeroClass.class );
 			armorTier	= bundle.getInt( TIER );
 			herolevel   = bundle.getInt( LEVEL );
 			depth       = bundle.getInt( DEPTH );
@@ -149,7 +148,6 @@ public enum Rankings {
 			bundle.put( SEED, customSeed );
 			bundle.put( DAILY, daily );
 
-			bundle.put( CLASS, heroClass );
 			bundle.put( TIER, armorTier );
 			bundle.put( LEVEL, herolevel );
 			bundle.put( DEPTH, depth );

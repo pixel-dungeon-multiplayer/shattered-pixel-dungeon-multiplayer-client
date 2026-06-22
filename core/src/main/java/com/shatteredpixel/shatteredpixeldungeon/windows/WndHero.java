@@ -26,7 +26,9 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDAction;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.CustomTalent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
@@ -305,24 +307,27 @@ public class WndHero extends WndTabbed {
 
 		private static final int GAP = 6;
 
-		private final @NotNull JSONObject args;
+		private final @Nullable JSONObject args;
 		private float pos;
 
 		private RemoteStatsTab(@NotNull JSONObject args) {
 			super();
 			this.args = args;
+			createChildren();
 		}
 
 		@Override
 		protected void createChildren() {
 			super.createChildren();
+			if (args == null) { return; }
 
 			IconTitle title = new IconTitle();
-			title.icon(Icons.get(Icons.RANKINGS));
 			JSONObject ownerHero = args.optJSONObject("owner_hero");
-			String name = ownerHero == null ? JsonStringHelper.optString(args, "title", "") : JsonStringHelper.optString(ownerHero, "name", "");
-			String className = ownerHero == null ? JsonStringHelper.optString(args, "hero_class", "") : JsonStringHelper.optString(ownerHero, "class", "");
-			title.label((name.isEmpty() ? className : name + "\n" + className).toUpperCase(Locale.ENGLISH));
+			String classId = ownerHero == null ? JsonStringHelper.optString(args, "hero_class", "") : JsonStringHelper.optString(ownerHero, "class", "");
+			HeroClass heroClass = heroClass(classId);
+			int armorTier = ownerHero == null ? args.optInt("tier", args.optInt("armor_tier", 0)) : ownerHero.optInt("tier", ownerHero.optInt("armor_tier", 0));
+			title.icon(remoteHeroIcon(heroClass, armorTier));
+			title.label(JsonStringHelper.getString(args, "title"));
 			title.color(Window.TITLE_COLOR);
 			title.setRect(0, 0, WIDTH, 0);
 			add(title);
@@ -331,6 +336,10 @@ public class WndHero extends WndTabbed {
 			JSONArray stats = args.optJSONArray("stats");
 			if (stats != null) {
 				for (int i = 0; i < stats.length(); i++) {
+					if (stats.isNull(i)) {
+						pos += GAP;
+						continue;
+					}
 					JSONObject stat = stats.getJSONObject(i);
 					statSlot(JsonStringHelper.getString(stat, "label"), String.valueOf(stat.get("value")));
 				}
@@ -338,35 +347,63 @@ public class WndHero extends WndTabbed {
 		}
 
 		private void statSlot(@NotNull String label, @NotNull String value) {
-			RenderedTextBlock txt = PixelScene.renderTextBlock(label, 8);
-			txt.maxWidth((int)(WIDTH * 0.55f));
+			int size = 8;
+			RenderedTextBlock txt;
+			do {
+				txt = PixelScene.renderTextBlock(label, size);
+				size--;
+			} while (txt.width() >= WIDTH * 0.55f);
 			txt.setPos(0, pos + (6 - txt.height()) / 2);
 			PixelScene.align(txt);
 			add(txt);
 
-			txt = PixelScene.renderTextBlock(value, 8);
-			txt.maxWidth((int)(WIDTH * 0.45f));
+			size = 8;
+			do {
+				txt = PixelScene.renderTextBlock(value, size);
+				size--;
+			} while (txt.width() >= WIDTH * 0.45f);
 			txt.setPos(WIDTH * 0.55f, pos + (6 - txt.height()) / 2);
 			PixelScene.align(txt);
 			add(txt);
 
 			pos += GAP + txt.height();
 		}
+
+		private static @Nullable HeroClass heroClass(@NotNull String classId) {
+			try {
+				return HeroClass.valueOf(classId);
+			} catch (IllegalArgumentException e) {
+				return null;
+			}
+		}
+
+		private static @NotNull Image remoteHeroIcon(@Nullable HeroClass heroClass, int armorTier) {
+			if (heroClass != null) {
+				try {
+					return HeroSprite.avatar(heroClass, armorTier);
+				} catch (RuntimeException ignored) {
+					return HeroSprite.avatar(heroClass, 0);
+				}
+			}
+			return Icons.get(Icons.RANKINGS);
+		}
 	}
 
 	private static class RemoteTalentsTab extends Component {
 
-		private final @NotNull JSONArray tiers;
+		private final @Nullable JSONArray tiers;
 		private TalentsPane pane;
 
 		private RemoteTalentsTab(@Nullable JSONArray tiers) {
 			super();
 			this.tiers = tiers == null ? new JSONArray() : tiers;
+			createChildren();
 		}
 
 		@Override
 		protected void createChildren() {
 			super.createChildren();
+			if (tiers == null) { return; }
 			pane = new TalentsPane(TalentButton.Mode.INFO, parseTalents(tiers));
 			add(pane);
 		}
@@ -386,7 +423,7 @@ public class WndHero extends WndTabbed {
 				if (talentArray != null) {
 					for (int j = 0; j < talentArray.length(); j++) {
 						JSONObject talent = talentArray.getJSONObject(j);
-						talents.put(Talent.valueOf(JsonStringHelper.getString(talent, "id")), talent.optInt("points", 0));
+						talents.put(CustomTalent.fromJson(talent), talent.optInt("points", 0));
 					}
 				}
 				result.add(talents);
@@ -397,27 +434,46 @@ public class WndHero extends WndTabbed {
 
 	private static class RemoteBuffsTab extends Component {
 
-		private final @NotNull JSONArray buffs;
+		private static final int GAP = 2;
+
+		private final @Nullable JSONArray buffs;
 		private ScrollPane buffList;
 		private float pos;
+		private ArrayList<RemoteBuffSlot> slots = new ArrayList<>();
 
 		private RemoteBuffsTab(@Nullable JSONArray buffs) {
 			super();
 			this.buffs = buffs == null ? new JSONArray() : buffs;
+			createChildren();
 		}
 
 		@Override
 		protected void createChildren() {
 			super.createChildren();
-			buffList = new ScrollPane(new Component());
+			if (buffs == null) { return; }
+			buffList = new ScrollPane(new Component()) {
+				@Override
+				public void onClick(float x, float y) {
+					int size = slots.size();
+					for (int i = 0; i < size; i++) {
+						if (slots.get(i).onClick(x, y)) {
+							break;
+						}
+					}
+				}
+			};
 			add(buffList);
 			Component content = buffList.content();
 			for (int i = 0; i < buffs.length(); i++) {
 				JSONObject buff = buffs.getJSONObject(i);
+				if (buff.optInt("icon", 0) == BuffIndicator.NONE) {
+					continue;
+				}
 				RemoteBuffSlot slot = new RemoteBuffSlot(buff);
-				slot.setRect(0, pos, WIDTH, 18);
+				slot.setRect(0, pos, WIDTH, slot.icon.height());
 				content.add(slot);
-				pos += 2 + slot.height();
+				slots.add(slot);
+				pos += GAP + slot.height();
 			}
 			content.setSize(WIDTH, pos);
 		}
@@ -431,27 +487,90 @@ public class WndHero extends WndTabbed {
 
 	private static class RemoteBuffSlot extends Component {
 
-		private final @NotNull JSONObject buff;
+		private static final int GAP = 2;
+
+		private final @Nullable JSONObject buff;
+		private Image icon;
 		private RenderedTextBlock txt;
 
 		private RemoteBuffSlot(@NotNull JSONObject buff) {
 			super();
 			this.buff = buff;
+			createChildren();
 		}
 
 		@Override
 		protected void createChildren() {
 			super.createChildren();
-			txt = PixelScene.renderTextBlock(JsonStringHelper.getString(buff, "name"), 8);
+			if (buff == null) { return; }
+			icon = new BuffIcon(buff.optInt("icon", 0), true);
+			if (buff.has("hardlight")) {
+				JSONObject hardlight = buff.optJSONObject("hardlight");
+				if (hardlight != null) {
+					icon.hardlight(
+							(float)hardlight.optDouble("rm", 0),
+							(float)hardlight.optDouble("gm", 0),
+							(float)hardlight.optDouble("bm", 0));
+				}
+			}
+			add(icon);
+
+			txt = PixelScene.renderTextBlock(Messages.titleCase(JsonStringHelper.getString(buff, "name")), 8);
 			add(txt);
 		}
 
 		@Override
 		protected void layout() {
 			super.layout();
-			txt.maxWidth((int)width);
-			txt.setPos(x, y + (height - txt.height()) / 2f);
+			icon.y = this.y;
+			txt.maxWidth((int)(width - icon.width()));
+			txt.setPos(
+					icon.width + GAP,
+					this.y + (icon.height - txt.height()) / 2
+			);
 			PixelScene.align(txt);
+		}
+
+		private boolean onClick(float x, float y) {
+			if (inside(x, y) && buff != null) {
+				GameScene.show(new RemoteBuffInfo(buff));
+				return true;
+			}
+			return false;
+		}
+	}
+
+	private static class RemoteBuffInfo extends Window {
+
+		private static final float GAP = 2;
+		private static final int WIDTH = 120;
+
+		private RemoteBuffInfo(@NotNull JSONObject buff) {
+			super();
+
+			IconTitle titlebar = new IconTitle();
+			Image buffIcon = new BuffIcon(buff.optInt("icon", 0), true);
+			if (buff.has("hardlight")) {
+				JSONObject hardlight = buff.optJSONObject("hardlight");
+				if (hardlight != null) {
+					buffIcon.hardlight(
+							(float)hardlight.optDouble("rm", 0),
+							(float)hardlight.optDouble("gm", 0),
+							(float)hardlight.optDouble("bm", 0));
+				}
+			}
+
+			titlebar.icon(buffIcon);
+			titlebar.label(Messages.titleCase(JsonStringHelper.getString(buff, "name")), Window.TITLE_COLOR);
+			titlebar.setRect(0, 0, WIDTH, 0);
+			add(titlebar);
+
+			RenderedTextBlock txtInfo = PixelScene.renderTextBlock(JsonStringHelper.getString(buff, "description"), 6);
+			txtInfo.maxWidth(WIDTH);
+			txtInfo.setPos(titlebar.left(), titlebar.bottom() + 2 * GAP);
+			add(txtInfo);
+
+			resize(WIDTH, (int)txtInfo.bottom() + 2);
 		}
 	}
 

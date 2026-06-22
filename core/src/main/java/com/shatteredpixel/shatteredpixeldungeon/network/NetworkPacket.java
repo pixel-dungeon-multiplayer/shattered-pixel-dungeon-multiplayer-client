@@ -121,7 +121,7 @@ public class NetworkPacket {
 
     public void packAndAddTalentUpgrade(Talent talent) {
         synchronized (dataRef) {
-            dataRef.get().put("talent_upgrade", talent.name());
+            dataRef.get().put("talent_upgrade", talent.id());
         }
     }
 

@@ -452,27 +452,7 @@ public enum Icons {
 	}
 	
 	public static Image get( HeroClass cl ) {
-		switch (cl) {
-			case WARRIOR:
-				return new ItemSprite(ItemSpriteSheet.SEAL);
-			case MAGE:
-				//mage's staff normally has 2 pixels extra at the top for particle effects, we chop that off here
-				Image result = new ItemSprite(ItemSpriteSheet.MAGES_STAFF);
-				RectF frame = result.frame();
-				frame.top += frame.height()/8f;
-				result.frame(frame);
-				return result;
-			case ROGUE:
-				return new ItemSprite(ItemSpriteSheet.ARTIFACT_CLOAK);
-			case HUNTRESS:
-				return new ItemSprite(ItemSpriteSheet.SPIRIT_BOW);
-			case DUELIST:
-				return new ItemSprite(ItemSpriteSheet.RAPIER);
-			case CLERIC:
-				return new ItemSprite(ItemSpriteSheet.ARTIFACT_TOME);
-			default:
-				return null;
-		}
+		return new ItemSprite(ItemSpriteSheet.SEAL);
 	}
 
 	public static Image get(Level.Feeling feeling){

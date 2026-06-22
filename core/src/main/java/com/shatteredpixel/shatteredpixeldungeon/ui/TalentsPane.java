@@ -26,7 +26,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.Ratmogrify;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -57,7 +56,6 @@ public class TalentsPane extends ScrollPane {
 	public TalentsPane( TalentButton.Mode mode, ArrayList<LinkedHashMap<Talent, Integer>> talents ) {
 		super(new Component());
 
-		Ratmogrify.useRatroicEnergy = Dungeon.hero != null && Dungeon.hero.armorAbility instanceof Ratmogrify;
 
 		int tiersAvailable = 1;
 
@@ -76,7 +74,7 @@ public class TalentsPane extends ScrollPane {
 					&& Dungeon.hero.lvl+1 >= Talent.tierLevelThresholds[tiersAvailable+1]){
 				tiersAvailable++;
 			}
-			if (tiersAvailable > 2 && Dungeon.hero.subClass == HeroSubClass.NONE){
+			if (tiersAvailable > 2 && Dungeon.hero.subClass.isNone()){
 				tiersAvailable = 2;
 			} else if (tiersAvailable > 3 && Dungeon.hero.armorAbility == null){
 				tiersAvailable = 3;

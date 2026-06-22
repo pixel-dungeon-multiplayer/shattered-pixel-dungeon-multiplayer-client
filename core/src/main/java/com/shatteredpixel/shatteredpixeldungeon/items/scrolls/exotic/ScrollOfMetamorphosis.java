@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.CustomTalent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Transmuting;
@@ -193,7 +194,7 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 			super();
 			setId(id);
 			INSTANCE = this;
-			replacing = Talent.valueOf(JsonStringHelper.getString(args, "replacing"));
+			replacing = Talent.valueOf(args.getString("replacing"));
 			tier = args.getInt("tier");
 			replaceOptions = parseTalentOptions(args.getJSONArray("options"));
 			setup(id, JsonStringHelper.getString(args, "message"), tier, replaceOptions);
@@ -241,7 +242,7 @@ public class ScrollOfMetamorphosis extends ExoticScroll {
 		LinkedHashMap<Talent, Integer> result = new LinkedHashMap<>();
 		for (int i = 0; i < options.length(); i++) {
 			JSONObject option = options.getJSONObject(i);
-			result.put(Talent.valueOf(JsonStringHelper.getString(option, "id")), option.optInt("points", 0));
+			result.put(CustomTalent.fromJson(option), option.optInt("points", 0));
 		}
 		return result;
 	}

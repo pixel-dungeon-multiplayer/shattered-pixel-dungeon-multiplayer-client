@@ -22,29 +22,62 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
-import com.watabou.utils.Bundlable;
-import com.watabou.utils.Bundle;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class ArmorAbility {
 
-	public String name(){
-		return Messages.get(this, "name");
+	private final @NotNull String id;
+	private final @NotNull String name;
+	private final @NotNull String shortDesc;
+	private final @NotNull String desc;
+	private final int icon;
+	private final @NotNull List<Talent> talents;
+
+	protected ArmorAbility(
+			@NotNull String id,
+			@NotNull String name,
+			@NotNull String shortDesc,
+			@NotNull String desc,
+			int icon,
+			@NotNull List<Talent> talents) {
+		this.id = id;
+		this.name = name;
+		this.shortDesc = shortDesc;
+		this.desc = desc;
+		this.icon = icon;
+		this.talents = Collections.unmodifiableList(new ArrayList<>(talents));
 	}
 
-	public String shortDesc(){
-		return Messages.get(this, "short_desc");
+	public final @NotNull String id() {
+		return id;
 	}
 
-	public String desc(){
-		return Messages.get(this, "desc") + "\n\n" + Messages.get(this, "cost", (int)35);
+	public final @NotNull String name(){
+		return name;
 	}
 
-	public int icon(){
+	public final @NotNull String shortDesc(){
+		return shortDesc;
+	}
+
+	public final @NotNull String desc(){
+		return desc;
+	}
+
+	public final int icon(){
+		return icon;
+	}
+
+	public final @NotNull List<Talent> talents() {
+		return talents;
+	}
+
+	public static int defaultIcon() {
 		return HeroIcon.NONE;
 	}
-
-	public abstract Talent[] talents();
-
 }

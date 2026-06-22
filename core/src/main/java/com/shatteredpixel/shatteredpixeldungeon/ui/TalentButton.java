@@ -190,7 +190,7 @@ public class TalentButton extends Button {
 						if (tier.containsKey(replacing)){
 							LinkedHashMap<Talent, Integer> newTier = new LinkedHashMap<>();
 							for (Talent t : tier.keySet()){
-								if (t == replacing){
+								if (t.equals(replacing)){
 									newTier.put(talent, tier.get(replacing));
 
 									if (!Dungeon.hero.metamorphedTalents.containsValue(replacing)){
@@ -199,13 +199,13 @@ public class TalentButton extends Button {
 									//if what we're replacing is already a value, we need to simplify the data structure
 									} else {
 										//a->b->a, we can just remove the entry entirely
-										if (Dungeon.hero.metamorphedTalents.get(talent) == replacing){
+										if (replacing.equals(Dungeon.hero.metamorphedTalents.get(talent))){
 											Dungeon.hero.metamorphedTalents.remove(talent);
 
 										//a->b->c, we need to simplify to a->c
 										} else {
 											for (Talent t2 : Dungeon.hero.metamorphedTalents.keySet()){
-												if (Dungeon.hero.metamorphedTalents.get(t2) == replacing){
+												if (replacing.equals(Dungeon.hero.metamorphedTalents.get(t2))){
 													Dungeon.hero.metamorphedTalents.put(t2, talent);
 												}
 											}

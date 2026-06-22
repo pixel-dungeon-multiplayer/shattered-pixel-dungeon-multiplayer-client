@@ -36,7 +36,7 @@ public class MirrorSprite extends MobSprite implements ClassSprite, TieredSprite
 	public MirrorSprite() {
 		super();
 		
-		texture( Dungeon.hero != null ? Dungeon.hero.heroClass.spritesheet() : HeroClass.WARRIOR.spritesheet() );
+		texture( Dungeon.hero != null ? Dungeon.hero.heroClass.spritesheet() : HeroClass.NONE.spritesheet() );
 		updateArmor( 0 );
 		idle();
 	}

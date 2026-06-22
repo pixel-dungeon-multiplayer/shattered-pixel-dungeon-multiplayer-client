@@ -21,7 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.watabou.noosa.particles.Emitter;
 import com.watabou.noosa.particles.PixelParticle;
 import com.watabou.utils.Random;

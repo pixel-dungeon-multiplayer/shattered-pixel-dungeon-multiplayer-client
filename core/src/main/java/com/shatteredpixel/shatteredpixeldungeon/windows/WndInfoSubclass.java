@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.CustomTalent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
@@ -34,7 +35,6 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 public class WndInfoSubclass extends WndTitledMessage {
@@ -48,7 +48,7 @@ public class WndInfoSubclass extends WndTitledMessage {
 		if (talentArray != null) {
 			for (int i = 0; i < talentArray.length(); i++) {
 				JSONObject talent = talentArray.getJSONObject(i);
-				talents.put(Talent.valueOf(JsonStringHelper.getString(talent, "id")), talent.optInt("points", 0));
+				talents.put(CustomTalent.fromJson(talent), talent.optInt("points", 0));
 			}
 		}
 		if (!talents.isEmpty()) {
@@ -63,11 +63,12 @@ public class WndInfoSubclass extends WndTitledMessage {
 	public WndInfoSubclass(HeroClass cls, HeroSubClass subCls){
 		super( new HeroIcon(subCls), Messages.titleCase(subCls.title()), subCls.desc());
 
-		ArrayList<LinkedHashMap<Talent, Integer>> talentList = new ArrayList<>();
-		Talent.initClassTalents(cls, talentList);
-		Talent.initSubclassTalents(subCls, talentList);
+		LinkedHashMap<Talent, Integer> talents = new LinkedHashMap<>();
+		for (Talent talent : subCls.talents()) {
+			talents.put(talent, 0);
+		}
 
-		TalentsPane.TalentTierPane talentPane = new TalentsPane.TalentTierPane(talentList.get(2), 3, TalentButton.Mode.INFO);
+		TalentsPane.TalentTierPane talentPane = new TalentsPane.TalentTierPane(talents, 3, TalentButton.Mode.INFO);
 		talentPane.title.text( Messages.titleCase(Messages.get(WndHeroInfo.class, "talents")));
 		talentPane.setRect(0, height + 5, width, talentPane.height());
 		add(talentPane);

@@ -44,7 +44,7 @@ public class WndBadge extends Window {
 	}
 	
 	public WndBadge( Badges.Badge badge, boolean unlocked ) {
-		this(badge.image, badge.title(), badge.desc() + (Badges.showCompletionProgress(badge) == null ? "" : Badges.showCompletionProgress(badge)), unlocked);
+		this(badge.image, badge.title(), badge.desc(), unlocked);
 	}
 
 	private WndBadge(int image, @NotNull String titleText, @NotNull String desc, boolean unlocked) {

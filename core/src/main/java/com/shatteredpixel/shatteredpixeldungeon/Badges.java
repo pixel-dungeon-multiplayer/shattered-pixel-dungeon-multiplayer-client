@@ -235,43 +235,6 @@ public class Badges {
 	
 
 
-
-	private static LinkedHashMap<HeroClass, Badge> firstBossClassBadges = new LinkedHashMap<>();
-	static {
-		firstBossClassBadges.put(HeroClass.WARRIOR, Badge.BOSS_SLAIN_1_WARRIOR);
-		firstBossClassBadges.put(HeroClass.MAGE, Badge.BOSS_SLAIN_1_MAGE);
-		firstBossClassBadges.put(HeroClass.ROGUE, Badge.BOSS_SLAIN_1_ROGUE);
-		firstBossClassBadges.put(HeroClass.HUNTRESS, Badge.BOSS_SLAIN_1_HUNTRESS);
-		firstBossClassBadges.put(HeroClass.DUELIST, Badge.BOSS_SLAIN_1_DUELIST);
-		firstBossClassBadges.put(HeroClass.CLERIC, Badge.BOSS_SLAIN_1_CLERIC);
-	}
-
-	private static LinkedHashMap<HeroClass, Badge> victoryClassBadges = new LinkedHashMap<>();
-	static {
-		victoryClassBadges.put(HeroClass.WARRIOR, Badge.VICTORY_WARRIOR);
-		victoryClassBadges.put(HeroClass.MAGE, Badge.VICTORY_MAGE);
-		victoryClassBadges.put(HeroClass.ROGUE, Badge.VICTORY_ROGUE);
-		victoryClassBadges.put(HeroClass.HUNTRESS, Badge.VICTORY_HUNTRESS);
-		victoryClassBadges.put(HeroClass.DUELIST, Badge.VICTORY_DUELIST);
-		victoryClassBadges.put(HeroClass.CLERIC, Badge.VICTORY_CLERIC);
-	}
-
-	private static LinkedHashMap<HeroSubClass, Badge> thirdBossSubclassBadges = new LinkedHashMap<>();
-	static {
-		thirdBossSubclassBadges.put(HeroSubClass.BERSERKER, Badge.BOSS_SLAIN_3_BERSERKER);
-		thirdBossSubclassBadges.put(HeroSubClass.GLADIATOR, Badge.BOSS_SLAIN_3_GLADIATOR);
-		thirdBossSubclassBadges.put(HeroSubClass.BATTLEMAGE, Badge.BOSS_SLAIN_3_BATTLEMAGE);
-		thirdBossSubclassBadges.put(HeroSubClass.WARLOCK, Badge.BOSS_SLAIN_3_WARLOCK);
-		thirdBossSubclassBadges.put(HeroSubClass.ASSASSIN, Badge.BOSS_SLAIN_3_ASSASSIN);
-		thirdBossSubclassBadges.put(HeroSubClass.FREERUNNER, Badge.BOSS_SLAIN_3_FREERUNNER);
-		thirdBossSubclassBadges.put(HeroSubClass.SNIPER, Badge.BOSS_SLAIN_3_SNIPER);
-		thirdBossSubclassBadges.put(HeroSubClass.WARDEN, Badge.BOSS_SLAIN_3_WARDEN);
-		thirdBossSubclassBadges.put(HeroSubClass.CHAMPION, Badge.BOSS_SLAIN_3_CHAMPION);
-		thirdBossSubclassBadges.put(HeroSubClass.MONK, Badge.BOSS_SLAIN_3_MONK);
-		thirdBossSubclassBadges.put(HeroSubClass.PRIEST, Badge.BOSS_SLAIN_3_PRIEST);
-		thirdBossSubclassBadges.put(HeroSubClass.PALADIN, Badge.BOSS_SLAIN_3_PALADIN);
-	}
-
 	
 	private static void displayBadge( Badge badge ) {
 
@@ -426,43 +389,4 @@ public class Badges {
 		}
 	}
 
-	//used for badges with completion progress that would otherwise be hard to track
-	public static String showCompletionProgress( Badge badge ){
-		if (isUnlocked(badge)) return null;
-
-		String result = "\n";
-
-		if (badge == Badge.BOSS_SLAIN_1_ALL_CLASSES){
-			for (HeroClass cls : HeroClass.values()){
-				result += "\n";
-				if (isUnlocked(firstBossClassBadges.get(cls)))  result += "_" + Messages.titleCase(cls.title()) + "_";
-				else                                            result += Messages.titleCase(cls.title());
-			}
-
-			return result;
-
-		} else if (badge == Badge.VICTORY_ALL_CLASSES) {
-
-			for (HeroClass cls : HeroClass.values()){
-				result += "\n";
-				if (isUnlocked(victoryClassBadges.get(cls)))    result += "_" + Messages.titleCase(cls.title()) + "_";
-				else                                            result += Messages.titleCase(cls.title());
-			}
-
-			return result;
-
-		} else if (badge == Badge.BOSS_SLAIN_3_ALL_SUBCLASSES){
-
-			for (HeroSubClass cls : HeroSubClass.values()){
-				if (cls == HeroSubClass.NONE) continue;
-				result += "\n";
-				if (isUnlocked(thirdBossSubclassBadges.get(cls)))   result += "_" + Messages.titleCase(cls.title()) + "_";
-				else                                                result += Messages.titleCase(cls.title()) ;
-			}
-
-			return result;
-		}
-
-		return null;
-	}
 }
