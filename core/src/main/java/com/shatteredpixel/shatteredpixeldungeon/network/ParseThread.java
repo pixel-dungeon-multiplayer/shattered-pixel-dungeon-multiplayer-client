@@ -664,40 +664,7 @@ public class ParseThread implements Callable<String> {
 
     public void parseHeap(JSONObject heapObj) {
         try {
-            if (level == null) {
-                Log.e("ParseHeap", "level == null");
-                return;
-            }
-            if (level.heaps == null) {
-                Log.e("ParseHeap", "level.heaps == null");
-                return;
-            }
-            int pos = heapObj.getInt("pos");
-            Heap heap = level.heaps.get(pos, null);
-            JSONObject visibleItemObj = heapObj.optJSONObject("visible_item");
-            if (heap != null) {
-                level.heaps.remove(pos);
-                heap.destroy();
-            }
-
-            if (visibleItemObj == null) {
-                return;
-            }
-            Heap newHeap = level.drop(CustomItem.createItem(visibleItemObj), pos);
-
-            newHeap.setCustomImage(heapObj.optInt("visible_sprite", -1));
-            newHeap.setCustomSpriteSheet(heapObj.optString("visible_sprite_sheet", null));
-            newHeap.showsItem = heapObj.optBoolean("show_item", false);
-            if (ParseThread.isConnectedToOldServer()){
-                if ( hero != null && hero.fieldOfView != null) {
-                   // newHeap.seen = hero.fieldOfView[newHeap.pos];
-                    newHeap.seen = false;
-                }
-            } else {
-                newHeap.seen = heapObj.optBoolean("seen", false);
-            }
-            if (newHeap.sprite != null) newHeap.sprite.link(newHeap);
-
+            throw new RuntimeException("fix this legacy");
         } catch (JSONException e) {
             Log.e("parse heap", String.format("bad heap. Exception: %s", e.getMessage()));
         }
@@ -1077,7 +1044,7 @@ public class ParseThread implements Callable<String> {
     }
 
     public void parseHeadDropVisualAction(JSONObject actionObj) throws JSONException {
-        int from =actionObj.getInt("from");
+        //int from =actionObj.getInt("from");
         int to = actionObj.getInt("to");
         //Item item = CustomItem.createItem(actionObj.getJSONObject("item"));
         //ItemSprite itemSprite = new ItemSprite(item);

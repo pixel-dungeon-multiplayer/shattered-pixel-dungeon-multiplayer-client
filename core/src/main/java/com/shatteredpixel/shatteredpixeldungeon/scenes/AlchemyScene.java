@@ -699,16 +699,12 @@ public class AlchemyScene extends PixelScene {
 		synchronized ( inputs ) {
 			for (int i = 0; i < inputs.length; i++) {
 				if (inputs[i] != null && inputs[i].item() != null) {
-					Item item = inputs[i].item();
-                    if (!false) {
-						Dungeon.level.drop(item, Dungeon.hero.pos);
-					}
-					inputs[i].item(null);
+                    inputs[i].item(null);
 				}
 			}
 		}
 		cancel.enable(false);
-		repeat.enable(null != null);
+		repeat.enable(false);
 		if (alchGuide != null){
 			alchGuide.updateList();
 		}

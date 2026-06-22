@@ -985,7 +985,6 @@ public class GameScene extends PixelScene {
 	public static void add( Heap heap ) {
 		if (scene != null) {
 			//heaps that aren't added as part of levelgen don't count for exploration bonus
-			heap.autoExplored = true;
 			scene.addHeapSprite( heap );
 		}
 	}
@@ -1728,13 +1727,7 @@ public class GameScene extends PixelScene {
 					textLines.add(0, Messages.get(GameScene.class, "attack"));
 				}
 			} else if (objects.get(0) instanceof Heap) {
-				switch (((Heap) objects.get(0)).type) {
-					case HEAP:
-						textLines.add(0, Messages.get(GameScene.class, "pick_up"));
-						break;
-					case FOR_SALE:
-						textLines.add(0, Messages.get(GameScene.class, "purchase"));
-						break;
+				switch (1) {
 					default:
 						textLines.add(0, Messages.get(GameScene.class, "interact"));
 						break;

@@ -21,233 +21,52 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
-import com.nikita22007.pixeldungeonmultiplayer.TranslationUtils;
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.nikita22007.multiplayer.utils.text.LocalizedString;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Shopkeeper;
-import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
-import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ElmoParticle;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.network.ParseThread;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-import com.watabou.noosa.audio.Sample;
-import com.watabou.utils.Bundlable;
-import com.watabou.utils.Bundle;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-
-public class Heap implements Bundlable {
-	public boolean showsItem;
-	protected int customImage = -1;
-	@Nullable
-	protected String customSpriteSheet = null;
-
-	public int getCustomImage() {
-		return customImage;
-	}
-
-	public void setCustomImage(int customImage) {
-		if (ParseThread.isConnectedToOldServer()){
-			customImage = TranslationUtils.translateItemImage(customImage);
-		}
-		if (customImage == this.customImage) {
-			return;
-		}
-		this.customImage = customImage;
-	}
-
-	public String spriteSheet() {
-		if (getCustomSpriteSheet() != null){
-			return getCustomSpriteSheet();
-		}
-		switch (type) {
-			case HEAP:
-			case FOR_SALE:
-				return size() > 0 ? items.peek().spriteSheet() : Assets.Sprites.ITEMS;
-			default:
-				return Assets.Sprites.ITEMS;
-		}
-	}
-
-	private String getCustomSpriteSheet() {
-		return customSpriteSheet;
-	}
-
-	public void setCustomSpriteSheet(String visibleSpriteSheet) {
-		customSpriteSheet = visibleSpriteSheet;
-	}
-
-	public enum Type {
-		HEAP,
-		FOR_SALE,
-		CHEST,
-		LOCKED_CHEST,
-		CRYSTAL_CHEST,
-		TOMB,
-		SKELETON,
-		REMAINS
-	}
-	public Type type = Type.HEAP;
-	
-	public int pos = 0;
+public class Heap {
+	public final int pos;
 	
 	public ItemSprite sprite;
-	public boolean seen = false;
-	public boolean haunted = false;
-	public boolean autoExplored = false; //used to determine if this heap should count for exploration bonus
-	public boolean hidden = false; //sets alpha to 15%
-	
-	public LinkedList<Item> items = new LinkedList<>();
 
-	public int size() {
-		return items.size();
+	private @Nullable Item item = null;
+	private LocalizedString title = LocalizedString.EMPTY;
+	private LocalizedString info = LocalizedString.EMPTY;
+	public boolean seen = false;
+	public boolean hidden = false; //sets alpha to 15%
+
+	@Contract(pure = true)
+	public Heap(int pos) {
+		this.pos = pos;
 	}
-	
-	public Item pickUp() {
-		
-		if (items.isEmpty()){
-			destroy();
-			return null;
+
+	public void update(@Nullable Item item, LocalizedString title, LocalizedString info, boolean seen, boolean hidden) {
+		this.item = item;
+		this.title = title;
+		this.info = info;
+		this.seen =  seen;
+		this.hidden = hidden;
+
+		if (sprite != null) {
+			sprite.view(this);
 		}
-		Item item = items.removeFirst();
-		if (items.isEmpty()) {
-			destroy();
-		} else if (sprite != null) {
-			sprite.view(this).place( pos );
-		}
-		
+	}
+
+	@Contract(pure = true)
+	public int size() {
+		return item == null ? 0 : 1;
+	}
+
+	@Contract(pure = true)
+	public Item peek() {
 		return item;
 	}
-	
-	public Item peek() {
-		final Item pseudoItem = getPseudoItem();
-		if ((showsItem) ||  (pseudoItem == null)) {
-			return items.peek();
-		} else {
-			return pseudoItem;
-		}
-	}
-
-	protected Item getPseudoItem(){
-		if (getCustomImage()!=-1) {
-			return new Item() {
-				@Override
-				public int image() {
-					return getCustomImage();
-				}
-				@Override
-				public String spriteSheet(){
-					return getCustomSpriteSheet();
-				}
-				;
-			};
-		}
-		return  null;
-	}
-
-	public void drop( Item item ) {
-		hidden = false;
-		
-		if (item.stackable && type != Type.FOR_SALE) {
-			
-			for (Item i : items) {
-				if (i.isSimilar( item )) {
-					item = i.merge( item );
-					break;
-				}
-			}
-			items.remove( item );
-			
-		}
-
-		items.addFirst( item );
-		
-		if (sprite != null) {
-			sprite.view(this).place( pos );
-		}
-
-
-	}
-	
-	public void replace( Item a, Item b ) {
-		hidden = false;
-		int index = items.indexOf( a );
-		if (index != -1) {
-			items.remove( index );
-			for (Item i : items) {
-				if (i.isSimilar( b )) {
-					i.merge( b );
-					return;
-				}
-			}
-			items.add( index, b );
-		}
-	}
-	
-	public void remove( Item a ){
-		hidden = false;
-		items.remove(a);
-		if (items.isEmpty()){
-			destroy();
-		} else if (sprite != null) {
-			sprite.view(this).place( pos );
-		}
-	}
-
-	//Note: should not be called to initiate an explosion, but rather by an explosion that is happening.
-	public void explode() {
-		hidden = false;
-
-		//breaks open most standard containers, mimics die.
-		if (type == Type.CHEST || type == Type.SKELETON) {
-			type = Type.HEAP;
-			sprite.link();
-			sprite.drop();
-			return;
-		}
-
-		if (type != Type.HEAP) {
-
-			return;
-
-		} else {
-
-			for (Item item : items.toArray( new Item[0] )) {
-
-				//unique items and equipment aren't affect by explosions
-				if (item.unique || item.isUpgradable() || item instanceof EquipableItem){
-					continue;
-				}
-				{
-					items.remove( item );
-				}
-
-			}
-
-			if (isEmpty()){
-				destroy();
-			} else if (sprite != null) {
-				sprite.view(this).place( pos );
-			}
-		}
-	}
-
-	public static void burnFX( int pos ) {
-		CellEmitter.get( pos ).burst( ElmoParticle.FACTORY, 6 );
-		Sample.INSTANCE.play( Assets.Sounds.BURNING );
-	}
-	
-	public static void evaporateFX( int pos ) {
-		CellEmitter.get( pos ).burst( Speck.factory( Speck.STEAM ), 5 );
-	}
-	
+	@Contract(pure = true)
 	public boolean isEmpty() {
-		return items == null || items.size() == 0;
+		return item == null;
 	}
 	
 	public void destroy() {
@@ -255,120 +74,17 @@ public class Heap implements Bundlable {
 		if (sprite != null) {
 			sprite.kill();
 		}
-		items.clear();
+		item = null;
 	}
 
+	@Contract(pure = true)
 	public String title(){
-		switch(type){
-			case FOR_SALE:
-				Item i = peek();
-				if (size() == 1) {
-					return Messages.get(this, "for_sale", Shopkeeper.sellPrice(i), i.title());
-				} else {
-					return i.title();
-				}
-			case CHEST:
-				return Messages.get(this, "chest");
-			case LOCKED_CHEST:
-				return Messages.get(this, "locked_chest");
-			case CRYSTAL_CHEST:
-				return Messages.get(this, "crystal_chest");
-			case TOMB:
-				return Messages.get(this, "tomb");
-			case SKELETON:
-				return Messages.get(this, "skeleton");
-			case REMAINS:
-				return Messages.get(this, "remains");
-			default:
-				return peek().title();
-		}
+		return title.resolve();
 	}
 
+	@Contract(pure = true)
 	public String info(){
-		switch(type){
-			case CHEST:
-				return Messages.get(this, "chest_desc");
-			case LOCKED_CHEST:
-				return Messages.get(this, "locked_chest_desc");
-			case CRYSTAL_CHEST:
-				if (false)
-					return Messages.get(this, "crystal_chest_desc", Messages.get(this, "artifact") );
-				else if (false)
-					return Messages.get(this, "crystal_chest_desc", Messages.get(this, "wand") );
-				else
-					return Messages.get(this, "crystal_chest_desc", Messages.get(this, "ring") );
-			case TOMB:
-				return Messages.get(this, "tomb_desc");
-			case SKELETON:
-				return Messages.get(this, "skeleton_desc");
-			case REMAINS:
-				return Messages.get(this, "remains_desc");
-			default:
-				return peek().info();
-		}
-	}
-
-	private static final String POS		= "pos";
-	private static final String SEEN	= "seen";
-	private static final String TYPE	= "type";
-	private static final String ITEMS	= "items";
-	private static final String HAUNTED	= "haunted";
-	private static final String AUTO_EXPLORED	= "auto_explored";
-	private static final String HIDDEN	= "hidden";
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public void restoreFromBundle( Bundle bundle ) {
-		pos = bundle.getInt( POS );
-		seen = bundle.getBoolean( SEEN );
-		type = Type.valueOf( bundle.getString( TYPE ) );
-		
-		items = new LinkedList<>((Collection<Item>) ((Collection<?>) bundle.getCollection(ITEMS)));
-		items.removeAll(Collections.singleton(null));
-		
-		//remove any document pages that either don't exist anymore or that the player already has
-		for (Item item : items.toArray(new Item[0])){
-		}
-		
-		haunted = bundle.getBoolean( HAUNTED );
-		autoExplored = bundle.getBoolean( AUTO_EXPLORED );
-		hidden = bundle.getBoolean( HIDDEN );
-	}
-
-	@Override
-	public void storeInBundle( Bundle bundle ) {
-		bundle.put( POS, pos );
-		bundle.put( SEEN, seen );
-		bundle.put( TYPE, type );
-
-		bundle.put( HAUNTED, haunted );
-		bundle.put( AUTO_EXPLORED, autoExplored );
-		bundle.put( HIDDEN, hidden );
-	}
-	public int getSpriteImage(){
-		if (getCustomImage() != -1){
-			return getCustomImage();
-		}
-		switch (type) {
-			case HEAP:
-			case FOR_SALE:
-				return size() > 0 ? items.peek().image() : 0;
-			case CHEST:
-			case LOCKED_CHEST:
-				return ItemSpriteSheet.LOCKED_CHEST;
-			case CRYSTAL_CHEST:
-				return ItemSpriteSheet.CRYSTAL_CHEST;
-			case TOMB:
-				return ItemSpriteSheet.TOMB;
-			case SKELETON:
-				return ItemSpriteSheet.BONES;
-
-			default:
-				return 0;
-		}
-	}
-	public void updateSprite(){
-		sprite = new ItemSprite(getSpriteImage());
+		return info.resolve();
 	}
 	
 }

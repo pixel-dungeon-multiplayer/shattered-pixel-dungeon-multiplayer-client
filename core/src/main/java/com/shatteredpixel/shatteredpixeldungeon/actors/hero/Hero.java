@@ -490,7 +490,6 @@ public class Hero extends Char {
 			}
 
 			Item item = Random.element(items);
-			Dungeon.level.drop(item, cell).sprite.drop(pos);
 			items.remove(item);
 		}
 

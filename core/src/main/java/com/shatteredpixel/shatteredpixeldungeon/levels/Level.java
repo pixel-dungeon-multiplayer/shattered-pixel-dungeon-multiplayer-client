@@ -37,14 +37,12 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.CustomTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.Group;
 import com.watabou.noosa.Scene;
 import com.watabou.utils.*;
-import com.watabou.utils.Random;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
@@ -219,7 +217,6 @@ public abstract class Level implements Bundlable {
 		bundle.put( MAPPED, mapped );
 		bundle.put( TRANSITIONS, transitions );
 		bundle.put( LOCKED, locked );
-		bundle.put( HEAPS, heaps.valueList() );
 		bundle.put( PLANTS, plants.valueList() );
 		bundle.put( TRAPS, traps.valueList() );
 		bundle.put( CUSTOM_TILES, customTiles );
@@ -438,26 +435,7 @@ public abstract class Level implements Bundlable {
 			}
 		}
 	}
-	
-	public Heap drop( Item item, int cell ) {
-		Heap heap = heaps.get( cell );
-		if (heap == null) {
 
-			heap = new Heap();
-
-			heap.seen = Dungeon.level == this && heroFOV[cell];
-			heap.pos = cell;
-			heap.drop(item);
-			{
-				heaps.put(cell, heap);
-				GameScene.add(heap);
-			}
-		} else {
-			heap.drop(item);
-		}
-
-		return heap;
-	}
 	//FIXME
 	public Plant plant( Plant.Seed seed, int pos ) {
 
