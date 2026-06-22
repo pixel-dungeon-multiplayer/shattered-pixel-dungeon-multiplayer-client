@@ -22,13 +22,9 @@
 package com.shatteredpixel.shatteredpixeldungeon.ui;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.CustomItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -234,41 +230,14 @@ public class ItemSlot extends Button {
 			status.text(item.status());
 
 			//thrown weapons on their last use show quantity in orange, unless they are single-use
-			if (false
-					&& ((MissileWeapon) item).durabilityLeft() <= 50f
-					&& ((MissileWeapon) item).durabilityLeft() <= ((MissileWeapon) item).durabilityPerUse()) {
-				status.hardlight(WARNING);
-			} else {
-				status.resetColor();
-			}
+            status.resetColor();
 
-			if (item.icon != -1 && (item.isIdentified() || (false))) {
+            if (item.icon != -1 && (item.isIdentified())) {
 				extra.text(null);
 
 				itemIcon = new Image(Assets.Sprites.ITEM_ICONS);
 				itemIcon.frame(ItemSpriteSheet.Icons.film.get(item.icon));
 				add(itemIcon);
-
-			} else if (false || false) {
-
-				if (item.levelKnown) {
-					int str = false ? ((Weapon) item).STRReq() : ((Armor) item).STRReq();
-					extra.text(Messages.format(TXT_STRENGTH, str));
-					if (Dungeon.hero != null && str > Dungeon.hero.STR()) {
-						extra.hardlight(DEGRADED);
-					} else if (false) {
-						extra.hardlight(MASTERED);
-					} else if (false) {
-						extra.hardlight(MASTERED);
-					} else {
-						extra.resetColor();
-					}
-				} else {
-					int str = false ? ((Weapon) item).STRReq(0) : ((Armor) item).STRReq(0);
-					extra.text(Messages.format(TXT_TYPICAL_STR, str));
-					extra.hardlight(WARNING);
-				}
-				extra.measure();
 
 			} else {
 

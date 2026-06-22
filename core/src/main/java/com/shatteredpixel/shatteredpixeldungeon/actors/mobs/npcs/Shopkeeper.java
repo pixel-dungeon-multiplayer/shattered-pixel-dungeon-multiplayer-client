@@ -33,56 +33,11 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ShopkeeperSprite;
 
 import java.util.ArrayList;
 
-public class Shopkeeper extends NPC {
-
-	{
-		spriteClass = ShopkeeperSprite.class;
-	}
-
-	public static int MAX_BUYBACK_HISTORY = 3;
-	public ArrayList<Item> buybackItems = new ArrayList<>();
-
-	private int turnsSinceHarmed = -1;
-
-	@Override
-	public Notes.Landmark landmark() {
-		return Notes.Landmark.SHOP;
-	}
-
-	@Override
-	protected boolean act() {
-
-		if (turnsSinceHarmed >= 0) {
-			turnsSinceHarmed++;
-		}
-
-		sprite.turnTo(pos, Dungeon.hero.pos);
-		spend(TICK);
-		return super.act();
-	}
-
-	@Override
-	public void destroy() {
-		super.destroy();
-		for (Heap heap : Dungeon.level.heaps.valueList()) {
-			if (heap.type == Heap.Type.FOR_SALE) {
-				if (ShatteredPixelDungeon.scene() instanceof GameScene) {
-					CellEmitter.get(heap.pos).burst(ElmoParticle.FACTORY, 4);
-				}
-				if (heap.size() == 1) {
-					heap.destroy();
-				} else {
-					heap.items.remove(heap.size() - 1);
-					heap.type = Heap.Type.HEAP;
-				}
-			}
-		}
-	}
+public class Shopkeeper {
 
 	//shopkeepers are greedy!
 	public static int sellPrice(Item item) {
 		return item.value() * 5 * (Dungeon.depth / 5 + 1);
 	}
-
 
 }

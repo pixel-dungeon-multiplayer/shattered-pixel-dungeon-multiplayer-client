@@ -21,20 +21,12 @@
 
 package com.shatteredpixel.shatteredpixeldungeon;
 
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import org.jetbrains.annotations.Contract;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 public class Badges {
 

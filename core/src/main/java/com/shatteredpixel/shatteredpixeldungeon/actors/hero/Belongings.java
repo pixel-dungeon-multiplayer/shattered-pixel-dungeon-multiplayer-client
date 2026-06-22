@@ -27,7 +27,6 @@ import com.badlogic.gdx.Gdx;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
 import com.shatteredpixel.shatteredpixeldungeon.items.*;
-import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.CustomBag;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -218,16 +217,7 @@ public class Belongings implements Iterable<Item> {
 	private static final String SECOND_WEP = "second_wep";
 
 	public static void preview( GamesInProgress.Info info, Bundle bundle ) {
-		if (bundle.contains( ARMOR )){
-			Armor armor = ((Armor)bundle.get( ARMOR ));
-			if (false){
-				info.armorTier = 6;
-			} else {
-				info.armorTier = armor.tier;
-			}
-		} else {
 			info.armorTier = 0;
-		}
 	}
 
 	//ignores lost inventory debuff

@@ -22,10 +22,6 @@
 package com.shatteredpixel.shatteredpixeldungeon.windows.legacy;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Shopkeeper;
 import com.shatteredpixel.shatteredpixeldungeon.items.*;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
@@ -34,7 +30,6 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CurrencyIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoItem;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import org.json.JSONObject;
@@ -44,119 +39,12 @@ public class WndTradeItem extends WndInfoItem {
 	private static final float GAP		= 2;
 	private static final int BTN_HEIGHT	= 18;
 
-	private WndBag owner;
-
-	private boolean selling = false;
-
-	//selling
-	public WndTradeItem( final Item item, WndBag owner ) {
-
-		super(item);
-
-		selling = true;
-
-		this.owner = owner;
-
-		float pos = height;
-
-		//find the shopkeeper in the current level
-		Shopkeeper shop = null;
-		for (Char ch : Actor.chars()){
-		}
-		final Shopkeeper finalShop = shop;
-
-		if (item.quantity() == 1 || (false)) {
-
-//			if (item instanceof MissileWeapon && ((MissileWeapon) item).extraThrownLeft){
-//				RenderedTextBlock warn = PixelScene.renderTextBlock(Messages.get(WndUpgrade.class, "thrown_dust"), 6);
-//				warn.hardlight(CharSprite.WARNING);
-//				warn.maxWidth(this.width);
-//				warn.setPos(0, pos + GAP);
-//				add(warn);
-//				pos = warn.bottom();
-//			}
-
-			RedButton btnSell = new RedButton( Messages.get(this, "sell", item.value()) ) {
-				@Override
-				protected void onClick() {
-					sell( item, finalShop);
-					hide();
-				}
-			};
-			btnSell.setRect( 0, pos + GAP, width, BTN_HEIGHT );
-			btnSell.icon(new ItemSprite(ItemSpriteSheet.GOLD));
-			add( btnSell );
-
-			pos = btnSell.bottom();
-
-		} else {
-
-			int priceAll= item.value();
-			RedButton btnSell1 = new RedButton( Messages.get(this, "sell_1", priceAll / item.quantity()) ) {
-				@Override
-				protected void onClick() {
-					sellOne( item, finalShop );
-					hide();
-				}
-			};
-			btnSell1.setRect( 0, pos + GAP, width, BTN_HEIGHT );
-			btnSell1.icon(new ItemSprite(ItemSpriteSheet.GOLD));
-			add( btnSell1 );
-			RedButton btnSellAll = new RedButton( Messages.get(this, "sell_all", priceAll ) ) {
-				@Override
-				protected void onClick() {
-					sell( item, finalShop );
-					hide();
-				}
-			};
-			btnSellAll.setRect( 0, btnSell1.bottom() + 1, width, BTN_HEIGHT );
-			btnSellAll.icon(new ItemSprite(ItemSpriteSheet.GOLD));
-			add( btnSellAll );
-
-			pos = btnSellAll.bottom();
-
-		}
-
-		resize( width, (int)pos );
-	}
-
-	//buying
-	public WndTradeItem( final Heap heap ) {
-
-		super(heap);
-
-		selling = false;
-		CurrencyIndicator.showGold = true;
-
-		Item item = heap.peek();
-
-		float pos = height;
-
-		final int price = Shopkeeper.sellPrice( item );
-
-		RedButton btnBuy = new RedButton( Messages.get(this, "buy", price) ) {
-			@Override
-			protected void onClick() {
-				hide();
-				buy( heap );
-			}
-		};
-		btnBuy.setRect( 0, pos + GAP, width, BTN_HEIGHT );
-		btnBuy.icon(new ItemSprite(ItemSpriteSheet.GOLD));
-		btnBuy.enable( price <= Dungeon.hero.gold );
-		add( btnBuy );
-
-		pos = btnBuy.bottom();
-
-        resize(width, (int) pos);
-	}
-
-    public WndTradeItem(JSONObject windowObj) {
+	public WndTradeItem(JSONObject windowObj) {
 		//would love java 23 statements before super
 		super(CustomItem.createItem(windowObj.getJSONObject("args").getJSONObject("item")));
 		setId(windowObj.getInt("id"));
 		JSONObject args = windowObj.getJSONObject("args");
-		this.selling = args.getBoolean("selling");
+        boolean selling = args.getBoolean("selling");
 		if (selling) {
 			createSelling(args);
 		} else {
@@ -184,7 +72,7 @@ public class WndTradeItem extends WndInfoItem {
 
 		} else {
 
-			int priceAll= value;
+			final int priceAll= value;
 			RedButton btnSell1 = new RedButton( Messages.get(this, "sell_1", priceAll / item.quantity()) ) {
 				@Override
 				protected void onClick() {
@@ -279,72 +167,6 @@ public class WndTradeItem extends WndInfoItem {
 		
 		super.hide();
 		CurrencyIndicator.showGold = false;
-		
-		if (owner != null) {
-			owner.hide();
-		}
 	}
 
-	public static void sell( Item item ) {
-		sell(item, null);
-	}
-
-	public static void sell( Item item, Shopkeeper shop ) {
-		
-		Hero hero = Dungeon.hero;
-		
-		if (item.isEquipped( hero ) && !((EquipableItem)item).doUnequip( hero, false )) {
-			return;
-		}
-
-		//selling items in the sell interface doesn't spend time
-		hero.spend(-hero.cooldown());
-
-        if (shop != null){
-			shop.buybackItems.add(item);
-			while (shop.buybackItems.size() > Shopkeeper.MAX_BUYBACK_HISTORY){
-				shop.buybackItems.remove(0);
-			}
-		}
-	}
-
-	public static void sellOne( Item item ) {
-		sellOne( item, null );
-	}
-
-	public static void sellOne( Item item, Shopkeeper shop ) {
-		
-		if (item.quantity() <= 1) {
-			sell( item, shop );
-		} else {
-			
-			Hero hero = Dungeon.hero;
-
-			item = item;
-
-			//selling items in the sell interface doesn't spend time
-			hero.spend(-hero.cooldown());
-
-
-            if (shop != null){
-				shop.buybackItems.add(item);
-				while (shop.buybackItems.size() > Shopkeeper.MAX_BUYBACK_HISTORY){
-					shop.buybackItems.remove(0);
-				}
-			}
-		}
-	}
-	
-	private void buy( Heap heap ) {
-		
-		Item item = heap.pickUp();
-		if (item == null) return;
-		
-		int price = Shopkeeper.sellPrice( item );
-		Dungeon.hero.gold -= price;
-
-		if (!false) {
-			Dungeon.level.drop( item, heap.pos ).sprite.drop();
-		}
-	}
 }
