@@ -46,16 +46,16 @@ import java.io.IOException;
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.level;
 
 public class InterlevelScene extends PixelScene {
-	
+
 	//slow fade on entering a new region
 	private static final float SLOW_FADE = 1f; //.33 in, 1.33 steady, .33 out, 2 seconds total
 	//norm fade when loading, falling, returning, or descending to a new floor
 	private static final float NORM_FADE = 0.67f; //.33 in, .67 steady, .33 out, 1.33 seconds total
 	//fast fade when ascending, or descending to a floor you've been on
 	private static final float FAST_FADE = 0.50f; //.33 in, .33 steady, .33 out, 1 second total
-	
+
 	private static float fadeTime;
-	
+
 	public enum Mode {
 		DESCEND, ASCEND, CONTINUE, RESURRECT, RETURN, FALL, RESET, NONE
 	}
@@ -63,14 +63,10 @@ public class InterlevelScene extends PixelScene {
 
 	public static LevelTransition curTransition = null;
 	public static int returnDepth;
-	public static int returnBranch;
-	public static int returnPos;
 	public static String customMessage;
 
 
-	public static boolean fallIntoPit;
-	
-	public enum Phase {
+    public enum Phase {
 		FADE_IN, STATIC, FADE_OUT, NONE
 	}
 	public static volatile Phase phase;
@@ -99,11 +95,11 @@ public class InterlevelScene extends PixelScene {
 	{
 		inGameScene = true;
 	}
-	
+
 	@Override
 	public void create() {
 		super.create();
-		
+
 		String loadingAsset;
 		int loadingDepth;
 		fadeTime = NORM_FADE;
@@ -198,7 +194,7 @@ public class InterlevelScene extends PixelScene {
 					break;
 			}
 		Random.popGenerator();
-		
+
 		if (DeviceCompat.isDebug()){
 			fadeTime = 0f;
 		}
@@ -252,7 +248,7 @@ public class InterlevelScene extends PixelScene {
 		add(im);
 
 		String text = Messages.get(Mode.class, mode.name());
-		
+
 		loadingText = PixelScene.renderTextBlock( text, 9 );
 		loadingText.setPos(
 				insets.left + w - loadingText.width() - 12,
@@ -398,7 +394,7 @@ public class InterlevelScene extends PixelScene {
 			thread = new Thread() {
 				@Override
 				public void run() {
-					
+
 					try {
 
 						Actor.fixTime();
@@ -426,11 +422,11 @@ public class InterlevelScene extends PixelScene {
 								reset();
 								break;
 						}
-						
+
 					} catch (Exception e) {
-						
+
 						error = e;
-						
+
 					}
 
 //					synchronized (thread) {
@@ -471,7 +467,7 @@ public class InterlevelScene extends PixelScene {
 		int h = (int)(Camera.main.height - insets.top - insets.bottom);
 
 		switch (phase) {
-		
+
 		case FADE_IN:
 			loadingText.alpha( Math.max(0, fadeTime - (timeLeft-0.333f)));
 			if ((timeLeft -= Game.elapsed) <= 0) {
@@ -485,7 +481,7 @@ public class InterlevelScene extends PixelScene {
 				phase = Phase.STATIC;
 			}
 			break;
-			
+
 		case FADE_OUT:
 			background.acc.set(0);
 			background.speed.set(0);
@@ -498,7 +494,7 @@ public class InterlevelScene extends PixelScene {
 				storyBG.alpha(btnContinue.alpha()*0.8f);
 				btnHideStory.icon().alpha(btnContinue.alpha());
 			}
-			
+
 			if ((timeLeft -= Game.elapsed) <= 0) {
 				phase = Phase.NONE;
 				Game.switchScene( GameScene.class );
@@ -507,7 +503,7 @@ public class InterlevelScene extends PixelScene {
 				error = null;
 			}
 			break;
-			
+
 		case STATIC:
 
 			if (btnContinue != null && textFadingIn) {
@@ -599,11 +595,6 @@ public class InterlevelScene extends PixelScene {
 		GameLog.wipe();
 		if (Dungeon.hero == null) {
 			resetLevel();
-			//SendData.SendHeroClass(GamesInProgress.selectedClass);
-//			if (noStory) {
-//				//Dungeon.chapters.add( WndStory.ID_SEWERS );
-//				noStory = false;
-//			}
 		}
 
 	}
@@ -612,10 +603,9 @@ public class InterlevelScene extends PixelScene {
 		Level oldLevel = level;
 		Dungeon.level = new SewerLevel();
 		Dungeon.level.create(oldLevel);
-		
+
 	}
 
-	//TODO atm falling always just increments depth by 1, do we eventually want to roll it into the transition system?
 	private void fall() throws IOException {
 		Actor.fixTime();
 		GameLog.wipe();
@@ -625,17 +615,17 @@ public class InterlevelScene extends PixelScene {
 		Actor.fixTime();
 		GameLog.wipe();
 	}
-	
+
 	private void returnTo() throws IOException {
 		Actor.fixTime();
 		GameLog.wipe();
 	}
-	
+
 	private void restore() throws IOException {
 		Actor.fixTime();
 		GameLog.wipe();
 	}
-	
+
 	private void resurrect() {
 
 		Actor.fixTime();
@@ -646,7 +636,7 @@ public class InterlevelScene extends PixelScene {
 		Actor.fixTime();
 		GameLog.wipe();
 	}
-	
+
 	@Override
 	protected void onBackPressed() {
 		//Do nothing
