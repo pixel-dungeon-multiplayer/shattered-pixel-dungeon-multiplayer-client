@@ -15,7 +15,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CustomBuff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.*;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.CustomMob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.*;
@@ -33,7 +35,6 @@ import com.shatteredpixel.shatteredpixeldungeon.network.actions.ActionParserRegi
 import com.shatteredpixel.shatteredpixeldungeon.network.actions.DefaultActionParserRegistry;
 import com.shatteredpixel.shatteredpixeldungeon.plants.CustomPlant;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.AlchemyScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.InterlevelScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.TitleScene;
@@ -592,24 +593,6 @@ public class ParseThread implements Callable<String> {
                     break;
                 case "trade_item":
                     GameScene.show(new WndTradeItem(windowObj));
-                    break;
-                case "alchemy":
-                    if (!(Game.scene() instanceof AlchemyScene)) {
-                        Game.switchScene(AlchemyScene.class, new Game.SceneChangeCallback() {
-                            @Override
-                            public void beforeCreate() {
-
-                            }
-
-                            @Override
-                            public void afterCreate() {
-                                ((AlchemyScene)Game.scene()).parseJson(windowObj);
-                            }
-                            });
-                        } else {
-                        ((AlchemyScene)Game.scene()).parseJson(windowObj);
-                    }
-
                     break;
                 case "guess":
                     GameScene.show(new StoneOfIntuition.WndGuess(windowObj));

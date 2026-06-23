@@ -160,7 +160,6 @@ public class WndEnergizeItem extends WndInfoItem {
 			Dungeon.energy += item.energyVal();
 			((AlchemyScene) ShatteredPixelDungeon.scene()).createEnergy();
 			if (!item.isIdentified()){
-				((AlchemyScene) ShatteredPixelDungeon.scene()).showIdentify(item);
 			}
 
 		} else {

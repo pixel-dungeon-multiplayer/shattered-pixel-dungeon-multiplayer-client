@@ -29,6 +29,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.*;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.nikita22007.multiplayer.utils.text.LocalizedString;
+import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
 import com.shatteredpixel.shatteredpixeldungeon.network.ParseThread;
 import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -47,7 +49,6 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.Toolbar;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.shatteredpixel.shatteredpixeldungeon.windows.IconTitle;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndEnergizeItem;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoItem;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndJournal;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndKeyBindings;
@@ -75,13 +76,23 @@ import java.util.ArrayList;
 
 public class AlchemyScene extends PixelScene {
 
+	private static final int BACK_BUTTON = -1; //special constant
+
+	private static final int CONTROL_BUTTON_GROUP = 000;
+	private static final int INPUT_BUTTON_GROUP = 100;
+	private static final int COMBINE_BUTTON_GROUP = 200;
+	private static final int OUTPUT_BUTTON_GROUP = 300;
+
+	private static final int CANCEL_BUTTON = CONTROL_BUTTON_GROUP + 0;
+	private static final int REPEAT_BUTTON = CONTROL_BUTTON_GROUP + 1;
+	private static final int ENERGY_ADD_BUTTON = CONTROL_BUTTON_GROUP + 2;
+	private static final int EXIT_BUTTON = CONTROL_BUTTON_GROUP + 3;
+
 	//max of 3 inputs, and 3 potential recipe outputs
 	private static final InputButton[] inputs = new InputButton[3];
 	private static final CombineButton[] combines = new CombineButton[3];
 	private static final OutputSlot[] outputs = new OutputSlot[3];
 	int windowID;
-	static int toolkitEnergy;
-	static boolean hasToolkit = false;
 
 	private IconButton cancel;
 	private IconButton repeat;
@@ -151,7 +162,7 @@ public class AlchemyScene extends PixelScene {
 			@Override
 			protected void onClick() {
 				Game.switchScene(GameScene.class);
-				sendResult(0, false);
+				sendResult(EXIT_BUTTON, false);
 			}
 		};
 		btnExit.setPos( insets.left + w - btnExit.width(), insets.top );
@@ -221,117 +232,17 @@ public class AlchemyScene extends PixelScene {
 
 		synchronized (inputs) {
 			for (int i = 0; i < inputs.length; i++) {
-				if (inputs[i] == null) {
-					inputs[i] = new InputButton();
-				} else {
-					//in case the scene was reset without calling destroy() for some reason
-					Item item = inputs[i].item();
-					inputs[i] = new InputButton();
-					if (item != null){
-						inputs[i].item(item);
-					}
-				}
+				inputs[i] = new InputButton(i);
 				inputs[i].setRect(left + 10, pos, BTN_SIZE, BTN_SIZE);
 				add(inputs[i]);
 				pos += BTN_SIZE + 2;
 			}
 		}
 
-		Button invSelector = new Button(){
-			@Override
-			protected void onClick() {
-						if (Dungeon.hero != null) {
-							ArrayList<Bag> bags = Dungeon.hero.belongings.getBags();
-
-							String[] names = new String[bags.size()];
-							Image[] images = new Image[bags.size()];
-							for (int i = 0; i < bags.size(); i++){
-								names[i] = Messages.titleCase(bags.get(i).name());
-								images[i] = new ItemSprite(bags.get(i));
-							}
-							String info = "";
-							if (ControllerHandler.controllerActive){
-								info += KeyBindings.getKeyName(KeyBindings.getFirstKeyForAction(GameAction.LEFT_CLICK, true)) + ": " + Messages.get(Toolbar.class, "container_select") + "\n";
-								info += KeyBindings.getKeyName(KeyBindings.getFirstKeyForAction(GameAction.BACK, true)) + ": " + Messages.get(Toolbar.class, "container_cancel");
-							} else {
-								info += Messages.get(WndKeyBindings.class, SPDAction.LEFT_CLICK.name()) + ": " + Messages.get(Toolbar.class, "container_select") + "\n";
-								info += KeyBindings.getKeyName(KeyBindings.getFirstKeyForAction(GameAction.BACK, false)) + ": " + Messages.get(Toolbar.class, "container_cancel");
-							}
-
-							Game.scene().addToFront(new RadialMenu(Messages.get(Toolbar.class, "container_prompt"), info, names, images){
-								@Override
-								public void onSelect(int idx, boolean alt) {
-									super.onSelect(idx, alt);
-									Bag bag = bags.get(idx);
-									ArrayList<Item> items = (ArrayList<Item>) bag.items.clone();
-
-									for(Item i : bag.items){
-										if (Dungeon.hero.belongings.lostInventory() && !i.keptThroughLostInventory()) items.remove(i);
-										//only upgradeable thrown weapons and wands allowed among equipment items
-										//other items can be unidentified, but not cursed
-										if (!!i.cursed) items.remove(i);
-									}
-
-									if (items.size() == 0){
-										ShatteredPixelDungeon.scene().addToFront(new WndMessage(Messages.get(AlchemyScene.class, "no_items")));
-										return;
-									}
-
-									String[] itemNames = new String[items.size()];
-									Image[] itemIcons = new Image[items.size()];
-									for (int i = 0; i < items.size(); i++){
-										itemNames[i] = Messages.titleCase(items.get(i).name());
-										itemIcons[i] = new ItemSprite(items.get(i));
-									}
-
-									String info = "";
-									if (ControllerHandler.controllerActive){
-										info += KeyBindings.getKeyName(KeyBindings.getFirstKeyForAction(GameAction.LEFT_CLICK, true)) + ": " + Messages.get(Toolbar.class, "item_select") + "\n";
-										info += KeyBindings.getKeyName(KeyBindings.getFirstKeyForAction(GameAction.BACK, true)) + ": " + Messages.get(Toolbar.class, "item_cancel");
-									} else {
-										info += Messages.get(WndKeyBindings.class, SPDAction.LEFT_CLICK.name()) + ": " + Messages.get(Toolbar.class, "item_select") + "\n";
-										info += KeyBindings.getKeyName(KeyBindings.getFirstKeyForAction(GameAction.BACK, false)) + ": " + Messages.get(Toolbar.class, "item_cancel");
-									}
-
-									Game.scene().addToFront(new RadialMenu(Messages.get(Toolbar.class, "item_prompt"), info, itemNames, itemIcons){
-										@Override
-										public void onSelect(int idx, boolean alt) {
-											super.onSelect(idx, alt);
-											Item item = items.get(idx);
-											synchronized (inputs) {
-												if (item != null && inputs[0] != null) {
-													for (int i = 0; i < inputs.length; i++) {
-														if (inputs[i].item() == null) {
-															if (false || false){
-																inputs[i].item(item);
-															} else {
-																inputs[i].item(item);
-															}
-															break;
-														}
-													}
-													updateState();
-												}
-											}
-
-										}
-									});
-								}
-							});
-						}
-			}
-
-			@Override
-			public GameAction keyAction() {
-				return SPDAction.INVENTORY_SELECTOR;
-			}
-		};
-		add(invSelector);
-
 		cancel = new IconButton(Icons.CLOSE.get()){
 			@Override
 			protected void onClick() {
-				sendResult(1, false);
+				sendResult(CANCEL_BUTTON, false);
 			}
 
 			@Override
@@ -351,11 +262,8 @@ public class AlchemyScene extends PixelScene {
 		repeat = new IconButton(Icons.REPEAT.get()){
 			@Override
 			protected void onClick() {
-				super.onClick();
-				if (null != null){
-					populate(lastIngredients, Dungeon.hero.belongings);
-				}
-			}
+				sendResult(REPEAT_BUTTON, false);
+            }
 
 			@Override
 			public GameAction keyAction() {
@@ -377,7 +285,7 @@ public class AlchemyScene extends PixelScene {
 			combines[i] = new CombineButton(i);
 			combines[i].enable(false);
 
-			outputs[i] = new OutputSlot();
+			outputs[i] = new OutputSlot(i);
 			outputs[i].item(null);
 
 			if (i == 0){
@@ -417,12 +325,7 @@ public class AlchemyScene extends PixelScene {
 				Math.max(0, h-pos));
 		lowerBubbles.pour(Speck.factory( Speck.BUBBLE ), 0.1f );
 
-		String energyText = Messages.get(AlchemyScene.class, "energy") + " " + Dungeon.energy;
-		if (hasToolkit){
-			energyText += "+" + toolkitEnergy;
-		}
-
-		energyLeft = PixelScene.renderTextBlock(energyText, 9);
+		energyLeft = PixelScene.renderTextBlock("", 9);
 		energyLeft.setPos(
 				centerW - energyLeft.width()/2,
 				insets.top + h - 8 - energyLeft.height()
@@ -430,7 +333,7 @@ public class AlchemyScene extends PixelScene {
 		energyLeft.hardlight(0x44CCFF);
 		add(energyLeft);
 
-		energyIcon = new ItemSprite( hasToolkit ? ItemSpriteSheet.ARTIFACT_TOOLKIT : ItemSpriteSheet.ENERGY);
+		energyIcon = new ItemSprite(ItemSpriteSheet.ENERGY);
 		energyIcon.x = energyLeft.left() - energyIcon.width();
 		energyIcon.y = energyLeft.top() - (energyIcon.height() - energyLeft.height())/2;
 		align(energyIcon);
@@ -455,8 +358,7 @@ public class AlchemyScene extends PixelScene {
 
 			@Override
 			protected void onClick() {
-				WndEnergizeItem.counter = windowID;
-				WndEnergizeItem.openItemSelector();
+				sendResult(ENERGY_ADD_BUTTON, false);
 			}
 
 			@Override
@@ -469,6 +371,7 @@ public class AlchemyScene extends PixelScene {
 				return Messages.get(AlchemyScene.class, "energize");
 			}
 		};
+
 		energyAdd.setRect(energyLeft.right(), energyLeft.top() - (16 - energyLeft.height())/2, 16, 16);
 		align(energyAdd);
 		add(energyAdd);
@@ -486,8 +389,6 @@ public class AlchemyScene extends PixelScene {
 					splitAlchGuide = !splitAlchGuide;
 					ShatteredPixelDungeon.seamlessResetScene();
 				} else {
-					clearSlots();
-					updateState();
 					AlchemyScene.this.addToFront(new Window() {
 
 						{
@@ -542,80 +443,30 @@ public class AlchemyScene extends PixelScene {
 	
 	@Override
 	protected void onBackPressed() {
-		Game.switchScene(GameScene.class);
+		sendResult(BACK_BUTTON, false);
 	}
-	
-	protected WndBag.ItemSelector itemSelector = new WndBag.ItemSelector() {
 
-		@Override
-		public String textPrompt() {
-			return Messages.get(AlchemyScene.class, "select");
-		}
-
-		@Override
-		public boolean itemSelectable(Item item) {
-			//only upgradeable thrown weapons and wands allowed among equipment items
-			//other items can be unidentified, but not cursed
-			return !item.cursed;
-		}
-
-		@Override
-		public void onSelect( Item item ) {
-			synchronized (inputs) {
-				if (item != null && inputs[0] != null) {
-					for (int i = 0; i < inputs.length; i++) {
-						if (inputs[i].item() == null) {
-							if (false || false){
-								inputs[i].item(item);
-							} else {
-								inputs[i].item(item);
-							}
-							break;
-						}
-					}
-					updateState();
-				}
-			}
-		}
-	};
-	
-	private<T extends Item> ArrayList<T> filterInput(Class<? extends T> itemClass){
+	private<T extends Item> ArrayList<T> filterInput(){
 		ArrayList<T> filtered = new ArrayList<>();
 		for (int i = 0; i < inputs.length; i++){
 			Item item = inputs[i].item();
-			if (item != null && itemClass.isInstance(item)){
+			if (item != null){
 				filtered.add((T)item);
 			}
 		}
 		return filtered;
 	}
 	private void updateState(){
-		repeat.enable(false);
-
-		ArrayList<Item> ingredients = filterInput(Item.class);
 		int recipesSize = 0;
 		for (int i = 0; i < outputs.length; i++) {
 			if(outputs[i].item() != null){
 				recipesSize++;
 			}
 		}
-		//disables / hides unneeded buttons
-		for (int i = recipesSize; i < combines.length; i++){
-			combines[i].enable(false);
-			outputs[i].item(null);
-
-			if (i != 0){
-				combines[i].visible = false;
-				outputs[i].visible = false;
-			}
-		}
-
-		cancel.enable(!ingredients.isEmpty());
 
 		if (recipesSize == 0){
 			combines[0].setPos(combines[0].left(), inputs[1].top()+5);
 			outputs[0].setPos(outputs[0].left(), inputs[1].top());
-			energyAddBlinking = false;
 			return;
 		}
 
@@ -626,38 +477,17 @@ public class AlchemyScene extends PixelScene {
 		height -= recipesSize*BTN_SIZE + (recipesSize-1)*gap;
 		float top = inputs[0].top() + height/2;
 
-		//positions and enables active buttons
-		boolean promptToAddEnergy = false;
+		//positions active buttons
 		for (int i = 0; i < recipesSize; i++){
-
-
-
-			outputs[i].visible = true;
 			outputs[i].setRect(outputs[0].left(), top, BTN_SIZE, BTN_SIZE);
 			top += BTN_SIZE+gap;
 
-			int availableEnergy = Dungeon.energy;
-			if (hasToolkit){
-				availableEnergy += toolkitEnergy;
-			}
-
-			combines[i].visible = true;
 			combines[i].setRect(combines[0].left(), outputs[i].top()+5, 30, 20);
-			//TODO: check this
-//			combines[i].enable(cost <= availableEnergy, cost);
-//
-//			if (cost > availableEnergy && recipe instanceof TrinketCatalyst.Recipe){
-//				promptToAddEnergy = true;
-//			}
-
 		}
-
-		energyAddBlinking = promptToAddEnergy;
 
 		if (alchGuide != null){
 			alchGuide.updateList();
 		}
-
 	}
 
 	public void populate(ArrayList<Item> toFind, Belongings inventory){
@@ -692,7 +522,6 @@ public class AlchemyScene extends PixelScene {
 
 	@Override
 	public void destroy() {
-		inputBtnCounter = 0;
 	}
 	
 	public void clearSlots(){
@@ -711,36 +540,15 @@ public class AlchemyScene extends PixelScene {
 	}
 
 	public void createEnergy(){
-		String energyText = Messages.get(AlchemyScene.class, "energy") + " " + Dungeon.energy;
-		if (hasToolkit){
-			energyText += "+" + toolkitEnergy;
-		}
-		energyLeft.text(energyText);
-		energyLeft.setPos(
-				centerW - energyLeft.width()/2,
-				energyLeft.top()
-		);
-
-		energyIcon.x = energyLeft.left() - energyIcon.width();
-		align(energyIcon);
-
-		energyAdd.setPos(energyLeft.right(), energyAdd.top());
-		align(energyAdd);
-
 		bubbleEmitter.start(Speck.factory( Speck.BUBBLE ), 0.01f, 100 );
 		sparkEmitter.burst(SparkParticle.FACTORY, 20);
 		Sample.INSTANCE.play( Assets.Sounds.LIGHTNING );
-
-
-		updateState();
 	}
 
-	public void showIdentify(Item item){
-		if (item.isIdentified()) return;
+	public void showIdentify(JSONObject oldNameObj, JSONObject newNameObj) {
+		final NinePatch BG = Chrome.get(Chrome.Type.TOAST);
 
-		NinePatch BG = Chrome.get(Chrome.Type.TOAST);
-
-		IconTitle oldName = new IconTitle(item){
+		IconTitle oldName = new IconTitle(){
 			@Override
 			public synchronized void update() {
 				super.update();
@@ -750,7 +558,9 @@ public class AlchemyScene extends PixelScene {
 				}
 			}
 		};
-		IconTitle newName = new IconTitle(item){
+		oldName.fromJson(oldNameObj);
+
+		IconTitle newName = new IconTitle(){
 
 			boolean fading;
 
@@ -772,6 +582,7 @@ public class AlchemyScene extends PixelScene {
 				}
 			}
 		};
+		newName.fromJson(newNameObj);
 		newName.alpha(-0.5f);
 
 		oldName.setSize(200, oldName.height());
@@ -800,16 +611,20 @@ public class AlchemyScene extends PixelScene {
 		add(BG);
 		add(oldName);
 		add(newName);
-
 	}
-	static int inputBtnCounter = 0;
+
 	private class InputButton extends Component {
-		int id = inputBtnCounter++;
+		int id;
 
 		protected NinePatch bg;
 		protected ItemSlot slot;
 		
 		private Item item = null;
+
+		private InputButton(int id) {
+			super();
+			this.id = id;
+		}
 		
 		@Override
 		protected void createChildren() {
@@ -831,12 +646,12 @@ public class AlchemyScene extends PixelScene {
 				@Override
 				protected void onClick() {
 					super.onClick();
-					sendResult(id + 100, false);
+					sendResult(id + INPUT_BUTTON_GROUP, false);
 				}
 
 				@Override
 				protected boolean onLongClick() {
-					sendResult(id + 100, false);
+					sendResult(id + INPUT_BUTTON_GROUP, true);
 					return true;
 				}
 
@@ -845,7 +660,7 @@ public class AlchemyScene extends PixelScene {
 				public GameAction keyAction() {
 					for (InputButton i : inputs){
 						if (i != null) {
-							if (i.item == null || false) {
+							if (i.item == null || i.item instanceof WndBag.Placeholder) {
 								if (i == InputButton.this) {
 									return SPDAction.INVENTORY;
 								} else {
@@ -859,7 +674,7 @@ public class AlchemyScene extends PixelScene {
 
 				@Override
 				protected String hoverText() {
-					if (item == null || false){
+					if (item == null || item instanceof WndBag.Placeholder){
 						return Messages.get(AlchemyScene.class, "add");
 					}
 					return super.hoverText();
@@ -924,7 +739,7 @@ public class AlchemyScene extends PixelScene {
 				@Override
 				protected void onClick() {
 					super.onClick();
-					sendResult(slot + 200, false);
+					sendResult(slot + COMBINE_BUTTON_GROUP, false);
 				}
 
 				@Override
@@ -989,10 +804,16 @@ public class AlchemyScene extends PixelScene {
 	}
 
 	private class OutputSlot extends Component {
+		int id;
 
 		protected NinePatch bg;
 		protected ItemSlot slot;
 		Item item;
+
+		private OutputSlot(int id) {
+			super();
+			this.id = id;
+		}
 
 		@Override
 		protected void createChildren() {
@@ -1004,9 +825,12 @@ public class AlchemyScene extends PixelScene {
 				@Override
 				protected void onClick() {
 					super.onClick();
-					if (visible && item != null && item.trueName() != null){
-						AlchemyScene.this.addToFront(new WndInfoItem(item));
-					}
+					sendResult(id + OUTPUT_BUTTON_GROUP, false);
+				}
+				@Override
+				protected boolean onLongClick() {
+					sendResult(id + OUTPUT_BUTTON_GROUP, true);
+					return true;
 				}
 			};
 			slot.item(null);
@@ -1033,61 +857,102 @@ public class AlchemyScene extends PixelScene {
 		}
 	}
 
-	private void updateEnergyText(){
-		String energyText = Messages.get(AlchemyScene.class, "energy") + " " + Dungeon.energy;
-		if (hasToolkit){
-			energyText += "+" + toolkitEnergy;
-		}
-		energyLeft.text(energyText);
-	}
 	public void parseJson(JSONObject object){
-		//Scene details
 		windowID = object.getInt("id");
 		JSONObject args = object.getJSONObject("args");
-		Dungeon.energy = args.getInt("energy");
-		boolean hasToolkit = args.getBoolean("has_toolkit");
-		if (hasToolkit) {
-			energyIcon.view(ItemSpriteSheet.ARTIFACT_TOOLKIT, null);
-			toolkitEnergy = args.getInt("toolkit_energy");
-		} else {
-			energyIcon.view(ItemSpriteSheet.ENERGY, null);
+
+		cancel.enable(args.getBoolean("cancel_enabled"));
+		repeat.enable(args.getBoolean("repeat_enabled"));
+		energyAdd.enable(args.getBoolean("energy_add_enabled"));
+
+		JSONObject energyIconObj = args.optJSONObject("energy_icon");
+		if (energyIconObj != null) {
+			int image = energyIconObj.optInt("image", 0);
+			ItemSprite.Glowing glowing = null;
+			if (energyIconObj.has("glowing") && !energyIconObj.isNull("glowing")) {
+				glowing = new ItemSprite.Glowing(energyIconObj.getJSONObject("glowing"));
+			}
+			String spriteSheet = energyIconObj.optString("sprite_sheet", null);
+			if (spriteSheet == null && energyIconObj.has("texture")) {
+				spriteSheet = energyIconObj.optString("texture", null);
+			}
+			if (spriteSheet != null && !spriteSheet.isEmpty()) {
+				energyIcon.view(spriteSheet, image, glowing);
+			} else {
+				energyIcon.view(image, glowing);
+			}
 		}
-		updateEnergyText();
-		//input
-		JSONArray input = args.getJSONArray("input");
-		for (int i = 0; i < input.length(); i++) {
-			inputs[i].fromJson(input.getJSONObject(i));
-			inputs[i].update();
+
+		LocalizedString energyText = JsonStringHelper.optLocalizedString(args, "energy_text", null);
+		if (energyText != null) {
+			energyLeft.text(energyText.resolve());
+			energyLeft.setPos(
+					centerW - energyLeft.width()/2,
+					energyLeft.top()
+			);
+			energyIcon.x = energyLeft.left() - energyIcon.width();
+			energyIcon.y = energyLeft.top() - (energyIcon.height() - energyLeft.height())/2;
+			align(energyIcon);
+			energyAdd.setRect(energyLeft.right(), energyLeft.top() - (16 - energyLeft.height())/2, 16, 16);
+			align(energyAdd);
+			sparkEmitter.pos(energyLeft.left(), energyLeft.top(), energyLeft.width(), energyLeft.height());
+		}
+
+		JSONArray input = args.getJSONArray("inputs");
+		for (int i = 0; i < input.length() && i < inputs.length; i++) {
+			if (input.isNull(i)) {
+				inputs[i].item(null);
+			} else {
+				inputs[i].fromJson(input.getJSONObject(i));
+				inputs[i].update();
+			}
 		}
 		for (int i = input.length(); i < inputs.length; i++) {
-				inputs[i].item(null);
+			inputs[i].item(null);
 		}
-		JSONArray output = args.getJSONArray("output");
-		JSONObject outputObject;
-		for (int i = 0; i < output.length(); i++) {
-			outputObject = output.getJSONObject(i);
-			int cost = outputObject.getInt("cost");
-			boolean enabled = outputObject.getBoolean("enabled");
-			Item item = CustomItem.createItem(outputObject.getJSONObject("item"));
-			outputs[i].item(item);
+
+		JSONArray combineButtons = args.getJSONArray("combine_buttons");
+		for (int i = 0; i < combineButtons.length() && i < combines.length; i++) {
+			JSONObject combineButtonObj = combineButtons.getJSONObject(i);
+			combines[i].visible = combineButtonObj.getBoolean("visible");
+			boolean enabled = combineButtonObj.getBoolean("enabled");
+			int cost = combineButtonObj.getInt("cost");
 			combines[i].enable(enabled, cost);
 		}
-		for (int i = output.length(); i < outputs.length; i++) {
-			outputs[i].item(null);
+
+		JSONArray outputArray = args.getJSONArray("outputs");
+		for (int i = 0; i < outputArray.length() && i < outputs.length; i++) {
+			JSONObject outputObject = outputArray.getJSONObject(i);
+			outputs[i].visible = outputObject.getBoolean("visible");
+			if (outputObject.isNull("item")) {
+				outputs[i].item(null);
+			} else {
+				outputs[i].item(CustomItem.createItem(outputObject.getJSONObject("item")));
+			}
 		}
-		//scene bottom part
-		energyAddBlinking = args.getBoolean("energyAddBlinking");
-		repeat.enable(args.getBoolean("repeat_enabled"));
-		if (args.has("createEnergy")){
+		for (int i = outputArray.length(); i < outputs.length; i++) {
+			outputs[i].item(null);
+			outputs[i].visible = false;
+		}
+
+		energyAddBlinking = args.getBoolean("energy_add_blinking");
+
+		if (args.optBoolean("create_energy_effect", false)) {
 			createEnergy();
 		}
-		if (args.has("craftedItem")) {
+		if (args.optBoolean("craft_effect", false)) {
 			bubbleEmitter.start(Speck.factory( Speck.BUBBLE ), 0.01f, 100 );
 			smokeEmitter.burst(Speck.factory( Speck.WOOL ), 10 );
 		}
 
+		if (args.has("identify_effect") && !args.isNull("identify_effect")) {
+			JSONObject identifyEffect = args.getJSONObject("identify_effect");
+			showIdentify(identifyEffect.getJSONObject("old_name"), identifyEffect.getJSONObject("new_name"));
+		}
+
 		updateState();
 	}
+
 	public void sendResult(int result, boolean longClick) {
 		JSONObject object = new JSONObject();
 		object.put("long_click", longClick);

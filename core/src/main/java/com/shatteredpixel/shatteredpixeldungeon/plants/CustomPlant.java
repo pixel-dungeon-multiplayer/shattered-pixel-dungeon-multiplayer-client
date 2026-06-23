@@ -22,7 +22,7 @@ public class CustomPlant extends Plant {
 
     @Override
     public String name(){
-        throw new RuntimeException("Stub!");
+        return plantName;
     }
     @Override
     public String desc() {
