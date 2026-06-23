@@ -1528,14 +1528,23 @@ public class ParseThread implements Callable<String> {
     }
     //TODO: check this
     public Char parseActorChar(JSONObject actorObj, int ID, Actor actor) throws JSONException {
-        Char chr;
-        final boolean add_actor = actor == null;
-        if (add_actor) {
+        final Char chr;
+        if (!(actor instanceof Char)) {
             chr = new CustomMob(ID);
-            level.mobs.add((Mob) chr);
-            GameScene.add((Mob) chr);
+            if (actor != null) {
+                Actor.remove(actor);
+            }
         } else {
             chr = (Char) actor;
+        }
+        if (!Actor.all().contains(chr)) {
+            Actor.add(chr);
+        }
+        if (chr instanceof CustomMob) {
+            if (!level.mobs.contains(chr)) {
+                level.mobs.add((Mob) chr);
+                GameScene.add((Mob) chr);
+            }
         }
         if (actorObj.has("position")) {
             chr.pos = actorObj.getInt("position");
