@@ -996,7 +996,7 @@ public class ParseThread implements Callable<String> {
             }
             parser.parse(this, actionObj);
         } catch (JSONException e) {
-            GLog.n("Incorrect action ( " + type + "). Ignored");
+            GLog.n("Incorrect action (" + type + "). Ignored");
             e.printStackTrace();
         }
     }

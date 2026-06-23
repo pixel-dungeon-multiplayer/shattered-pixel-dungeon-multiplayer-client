@@ -93,7 +93,7 @@ public class WndUpgrade extends Window {
 		if (messages != null) {
 			for (int i = 0; i < messages.length(); i++) {
 				JSONObject message = messages.getJSONObject(i);
-				bottom = addMessage(JsonStringHelper.getString(message, "text"), message.getInt("color"), bottom);
+				bottom = addMessage(JsonStringHelper.getString(message, "text"), message.optInt("color", 0xFFFFFF), bottom);
 			}
 		}
 

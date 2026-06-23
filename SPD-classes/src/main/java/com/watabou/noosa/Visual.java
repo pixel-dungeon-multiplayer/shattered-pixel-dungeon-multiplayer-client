@@ -249,7 +249,7 @@ public class Visual extends Gizmo {
 	}
 	
 	public void hardlight( int color ) {
-		hardlight( (color >> 16) / 255f, ((color >> 8) & 0xFF) / 255f, (color & 0xFF) / 255f );
+		hardlight( ((color >> 16)& 0xFF) / 255f, ((color >> 8) & 0xFF) / 255f, (color & 0xFF) / 255f );
 	}
 	
 	public void resetColor() {
