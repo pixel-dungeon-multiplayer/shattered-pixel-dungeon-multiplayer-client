@@ -57,10 +57,10 @@ public class BlacksmithSprite extends MobSprite {
 	public void link( Char ch ) {
 		super.link( ch );
 		
-		emitter = new Emitter();
-		emitter.autoKill = false;
-		emitter.pos( x + 7, y + 12 );
-		parent.add( emitter );
+		//emitter = new Emitter();
+		//emitter.autoKill = false;
+		//emitter.pos( x + 7, y + 12 );
+		//		parent.add( emitter );
 	}
 	
 	@Override
