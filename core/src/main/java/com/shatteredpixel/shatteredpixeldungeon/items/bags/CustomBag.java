@@ -24,7 +24,9 @@ public class CustomBag extends Bag {
             size = obj.getInt("capacity");
         }
         if (obj.has("owner")) {
-            owner = (Char) Actor.findById(obj.getInt("owner"));
+            if (!obj.isNull("owner")) {
+                owner = (Char) Actor.findById(obj.getInt("owner"));
+            }
         }
         if (obj.has("items")) {
             addItemsFromJSONArray(obj.getJSONArray("items"));
