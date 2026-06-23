@@ -24,7 +24,6 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -209,11 +208,6 @@ public class Item  {
 	}
 
 	@Contract(pure=true)
-	public boolean isUpgradable() {
-		return true;
-	}
-
-	@Contract(pure=true)
 	public boolean isIdentified() {
 		return levelKnown && cursedKnown;
 	}
@@ -221,10 +215,6 @@ public class Item  {
 	@Contract(pure = true)
 	public boolean isEquipped( Hero hero ) {
 		return false;
-	}
-
-	public static void evoke( Hero hero ) {
-		hero.sprite.emitter().burst( Speck.factory( Speck.EVOKE ), 5 );
 	}
 
 	@Contract(pure = true)

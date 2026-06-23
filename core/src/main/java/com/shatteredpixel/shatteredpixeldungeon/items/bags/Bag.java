@@ -28,8 +28,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.CustomItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndQuickBag;
-import com.watabou.utils.Bundle;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -42,6 +42,7 @@ public class Bag extends CustomItem implements Iterable<Item> {
 	/*
 	* recursive search of Item.
 	* */
+	@Contract(pure = true)
 	public List<Integer> pathOfItem(Item item) {
 		assert (item != null) : "path of null item";
 		for (int i = 0; i < items.size(); i++) { //check all items
@@ -112,11 +113,6 @@ public class Bag extends CustomItem implements Iterable<Item> {
 	}
 
 	@Override
-	public boolean isUpgradable() {
-		return false;
-	}
-	
-	@Override
 	public boolean isIdentified() {
 		return true;
 	}
@@ -124,37 +120,14 @@ public class Bag extends CustomItem implements Iterable<Item> {
 	public void clear() {
 		items.clear();
 	}
-	
-	public void resurrect() {
-		for (Item item : items.toArray(new Item[0])){
-			if (!item.unique) items.remove(item);
-		}
-	}
 
-	//temp variable so that bags can load contents even with lost inventory debuff
-	private boolean loading;
-
-	
+	@Contract(pure = true)
 	public boolean contains( Item item ) {
 		for (Item i : items) {
 			if (i == item) {
 				return true;
 			} else if (i instanceof Bag && ((Bag)i).contains( item )) {
 				return true;
-			}
-		}
-		return false;
-	}
-
-	public boolean canHold( Item item ){
-
-        if (items.contains(item) || item instanceof Bag || items.size() < capacity()){
-			return true;
-		} else if (item.stackable) {
-			for (Item i : items) {
-				if (item.isSimilar( i )) {
-					return true;
-				}
 			}
 		}
 		return false;
@@ -233,6 +206,7 @@ public class Bag extends CustomItem implements Iterable<Item> {
 		}
 	}
 
+	@Contract(pure = true)
 	public Item getItemInSlot(@NotNull List<Integer> slotPath) {
 		if (slotPath.size() > 1) {
 			return ((Bag) items.get(slotPath.get(0))).getItemInSlot(slotPath.subList(1, slotPath.size()));

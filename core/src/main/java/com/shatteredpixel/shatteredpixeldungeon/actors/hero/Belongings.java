@@ -223,8 +223,12 @@ public class Belongings implements Iterable<Item> {
 	//ignores lost inventory debuff
 	public ArrayList<Bag> getBags(){
 		ArrayList<Bag> result = new ArrayList<>();
-
 		result.add(backpack);
+		for (Item item : this) {
+			if (item instanceof Bag) {
+				result.add((Bag)item);
+			}
+		}
 		return result;
 	}
 

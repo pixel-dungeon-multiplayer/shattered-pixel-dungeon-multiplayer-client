@@ -23,7 +23,6 @@ package com.shatteredpixel.shatteredpixeldungeon.plants;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LeafParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -98,13 +97,8 @@ public abstract class Plant implements Bundlable {
 			plant.pos = pos;
 			return plant;
 		}
-		
-		@Override
-		public boolean isUpgradable() {
-			return false;
-		}
-		
-		@Override
+
+        @Override
 		public boolean isIdentified() {
 			return true;
 		}

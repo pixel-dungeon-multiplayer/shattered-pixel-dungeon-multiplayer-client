@@ -41,12 +41,7 @@ public abstract class Key extends Item {
 	}
 
 
-	@Override
-	public boolean isUpgradable() {
-		return false;
-	}
-	
-	@Override
+    @Override
 	public boolean isIdentified() {
 		return true;
 	}
