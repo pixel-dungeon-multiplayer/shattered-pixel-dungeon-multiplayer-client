@@ -30,7 +30,7 @@ import android.os.ParcelFileDescriptor;
 
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Rankings;
-import com.shatteredpixel.shatteredpixeldungeon.journal.Journal;
+//import com.shatteredpixel.shatteredpixeldungeon.journal.Journal;
 
 import java.io.File;
 
@@ -57,14 +57,15 @@ public class AndroidBackupHandler extends BackupAgent {
 		if (file != null){
 			fullBackupFile( file , data);
 		}
-		file = getFile( getFilesDir(), Badges.BADGES_FILE );
-		if (file != null){
-			fullBackupFile( file , data);
-		}
-		file = getFile( getFilesDir(), Journal.JOURNAL_FILE );
-		if (file != null){
-			fullBackupFile( file , data);
-		}
+		//TODO: check if we need to back these up
+//		file = getFile( getFilesDir(), Badges.BADGES_FILE );
+//		if (file != null){
+//			fullBackupFile( file , data);
+//		}
+//		file = getFile( getFilesDir(), Journal.JOURNAL_FILE );
+//		if (file != null){
+//			fullBackupFile( file , data);
+//		}
 	}
 	
 	private static File getFile( File base, String name ){
