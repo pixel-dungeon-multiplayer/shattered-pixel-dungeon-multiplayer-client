@@ -1516,28 +1516,6 @@ public class GameScene extends PixelScene {
 		}
 
 		SendData.sendExamineActions(cell);
-		if (true) return;
-
-		ArrayList<Object> objects = getObjectsAtCell(cell);
-
-		if (objects.isEmpty()) {
-			GameScene.show(new WndInfoCell(cell));
-		} else if (objects.size() == 1){
-			examineObject(objects.get(0));
-		} else {
-			String[] names = getObjectNames(objects).toArray(new String[0]);
-
-			GameScene.show(new WndOptions(Icons.get(Icons.INFO),
-					Messages.get(GameScene.class, "choose_examine"),
-					Messages.get(GameScene.class, "multiple_examine"),
-					names){
-				@Override
-				protected void onSelect(int index) {
-					examineObject(objects.get(index));
-				}
-			});
-
-		}
 	}
 
 	private static ArrayList<Object> getObjectsAtCell( int cell ){
@@ -1575,25 +1553,7 @@ public class GameScene extends PixelScene {
 		return names;
 	}
 
-	public static void examineObject(Object o){
-		if (o == Dungeon.hero){
-			GameScene.show( new WndHero() );
-		} else if ( o instanceof Mob && ((Mob) o).isActive() ){
-			GameScene.show(new WndInfoMob((Mob) o));
-        } else if ( o instanceof Heap && !((Heap) o).isEmpty() ){
-			GameScene.show(new WndInfoItem((Heap)o));
-		} else if ( o instanceof Plant ){
-			GameScene.show( new WndInfoPlant((Plant) o) );
-			//plants can be harmful to trample, so let the player ID just by examine
-		} else if ( o instanceof Trap ){
-			GameScene.show( new WndInfoTrap((Trap) o));
-			//traps are often harmful to trigger, so let the player ID just by examine
-		} else {
-			GameScene.show( new WndMessage( Messages.get(GameScene.class, "dont_know") ) ) ;
-		}
-	}
 
-	
 	public static final CustomCellListener defaultCellListener = new CustomCellListener();
 
 	public GameLog getGameLog(){
@@ -1757,16 +1717,9 @@ public class GameScene extends PixelScene {
 					if (index == 0){
 						handleCell(cell);
 					} else {
-						if (true) {
-							SendData.sendExamineActions(cell);
-							return;
-						}
-						if (objects.size() == 0){
-							GameScene.show(new WndInfoCell(cell));
-						} else {
-							examineObject(objects.get(index-1));
-						}
-					}
+                        SendData.sendExamineActions(cell);
+                        return;
+                    }
 				}
 			};
 			scene.addToFront(menu);
