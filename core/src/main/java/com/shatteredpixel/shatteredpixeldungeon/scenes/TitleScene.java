@@ -43,9 +43,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.StyledButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TitleBackground;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndSettings;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndVictoryCongrats;
+import com.shatteredpixel.shatteredpixeldungeon.windows.*;
 import com.watabou.glwrap.Blending;
 import com.watabou.input.PointerEvent;
 import com.watabou.noosa.BitmapText;
@@ -486,7 +484,8 @@ public class TitleScene extends PixelScene {
 
 		@Override
 		protected void onClick() {
-			ShatteredPixelDungeon.switchNoFade(SupporterScene.class);
+			//ShatteredPixelDungeon.switchNoFade(SupporterScene.class);
+			addToFront(new WndTitledMessage(Icons.get(Icons.GOLD), "No support yet", "If u want to support us, contact us on Discord"));
 		}
 	}
 }
