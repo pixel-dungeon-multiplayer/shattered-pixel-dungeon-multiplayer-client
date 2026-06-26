@@ -27,12 +27,12 @@ import com.shatteredpixel.shatteredpixeldungeon.network.actions.items.ItemRemove
 import com.shatteredpixel.shatteredpixeldungeon.network.actions.items.ItemReplaceParser;
 import com.shatteredpixel.shatteredpixeldungeon.network.actions.items.ItemUpdateParser;
 import com.shatteredpixel.shatteredpixeldungeon.network.actions.level.*;
+import com.shatteredpixel.shatteredpixeldungeon.network.actions.customtilemap.*;
 import com.shatteredpixel.shatteredpixeldungeon.network.actions.plants.PlantRemoveParser;
 import com.shatteredpixel.shatteredpixeldungeon.network.actions.plants.PlantUpdateParser;
 import com.shatteredpixel.shatteredpixeldungeon.network.actions.traps.TrapRemoveParser;
 import com.shatteredpixel.shatteredpixeldungeon.network.actions.traps.TrapUpdateParser;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
-import com.shatteredpixel.shatteredpixeldungeon.tiles.FadingTraps;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.Camera;
@@ -72,7 +72,10 @@ public class DefaultActionParserRegistry {
         register(registry, "surprise_visual", 1, new SurpriseVisualParser());
         register(registry, "boss_health_bar", 1, new BossHealthBarParser());
         register(registry, "game_scene_flash", 1, new GameSceneFlashParser());
-        register(registry, "fading_traps", 1, new FadingTrapsParser());
+        register(registry, "custom_tilemap_add", 1, new CustomTilemapAddParser());
+        register(registry, "custom_tilemap_remove", 1, new CustomTilemapRemoveParser());
+        register(registry, "update_custom_tilemap", 1, new CustomTilemapUpdateParser());
+        register(registry, "custom_tilemap_special", 1, new CustomTilemapSpecialParser());
         register(registry, "show_banner", 1, new ShowBannerParser());
         register(registry, "redirect_server", 1, new RedirectServerParser());
         register(registry, "resize_level", 1, new ResizeLevelParser());
@@ -227,12 +230,6 @@ public class DefaultActionParserRegistry {
     private static class GameSceneFlashParser implements ActionParser {
         public void parse(ParseThread parseThread, JSONObject action) throws JSONException {
             GameScene.flash(action.getInt("color"), action.getBoolean("light"));
-        }
-    }
-
-    private static class FadingTrapsParser implements ActionParser {
-        public void parse(ParseThread parseThread, JSONObject action) {
-            FadingTraps.fromJSON(action);
         }
     }
 

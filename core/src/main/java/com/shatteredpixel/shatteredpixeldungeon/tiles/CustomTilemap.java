@@ -29,17 +29,21 @@ import com.watabou.noosa.TextureFilm;
 import com.watabou.noosa.Tilemap;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
-public abstract class CustomTilemap implements Bundlable {
+public class CustomTilemap implements Bundlable {
 
 	protected static final int SIZE = DungeonTilemap.SIZE;
 
 	public int tileX, tileY;   //x and y coords for texture within a level
 	public int tileW = 1, tileH = 1; //width and height in tiles
-	
+
 	protected Object texture;
-	protected Tilemap vis = null;
+	protected int[] data;
+	protected int cols;
+	protected float alpha = 1f;
+	public Tilemap vis = null;
 
 	public void pos(int pos) {
 		pos( pos, Dungeon.level );
@@ -68,7 +72,7 @@ public abstract class CustomTilemap implements Bundlable {
 		this.tileW = tileW;
 		this.tileH = tileH;
 	}
-	
+
 	//utility method for getting data for a simple image
 	//assumes tileW and tileH have already been set
 	protected int[] mapSimpleImage(int txX, int txY, int texW){
@@ -77,7 +81,7 @@ public abstract class CustomTilemap implements Bundlable {
 		int x = txX, y = txY;
 		for (int i = 0; i < data.length; i++){
 			data[i] = x + (texTileWidth*y);
-			
+
 			x++;
 			if ((x - txX) == tileW){
 				x = txX;
@@ -86,7 +90,7 @@ public abstract class CustomTilemap implements Bundlable {
 		}
 		return data;
 	}
-	
+
 	public Tilemap create(){
 		if (vis != null && vis.alive) vis.killAndErase();
 		vis = new Tilemap(texture, new TextureFilm( texture, SIZE, SIZE )){
@@ -98,6 +102,10 @@ public abstract class CustomTilemap implements Bundlable {
 		};
 		vis.x = tileX*SIZE;
 		vis.y = tileY*SIZE;
+		if (data != null) {
+			vis.map(data, cols > 0 ? cols : tileW);
+			vis.alpha(alpha);
+		}
 		return vis;
 	}
 
@@ -141,10 +149,37 @@ public abstract class CustomTilemap implements Bundlable {
 		bundle.put(TILE_W, tileW);
 		bundle.put(TILE_H, tileH);
 	}
-    public void fromJson(JSONObject object){
-        tileX = object.getInt(TILE_X);
-        tileY = object.getInt(TILE_Y);
-        tileW = object.getInt(TILE_W);
-        tileH = object.getInt(TILE_H);
-    }
+
+	public void fromJson(JSONObject object) {
+		tileX = object.optInt("x", object.optInt(TILE_X, tileX));
+		tileY = object.optInt("y", object.optInt(TILE_Y, tileY));
+		tileW = object.optInt("w", object.optInt(TILE_W, tileW));
+		tileH = object.optInt("h", object.optInt(TILE_H, tileH));
+		if (object.has("texture")) {
+			texture = object.get("texture");
+		}
+		if (object.has("cols")) {
+			cols = object.getInt("cols");
+		}
+		if (object.has("alpha")) {
+			alpha = (float)object.getDouble("alpha");
+		}
+		if (object.has("data")) {
+			JSONArray dataArr = object.getJSONArray("data");
+			data = new int[dataArr.length()];
+			for (int i = 0; i < data.length; i++) {
+				data[i] = dataArr.getInt(i);
+			}
+		}
+	}
+
+	public static CustomTilemap createByType(String type) {
+		if ("entrance_barrier".equals(type)) {
+			return new EntranceBarrier();
+		} else if ("prison_fading_traps".equals(type)) {
+			return new FadingTraps();
+		} else {
+			return new CustomTilemap();
+		}
+	}
 }

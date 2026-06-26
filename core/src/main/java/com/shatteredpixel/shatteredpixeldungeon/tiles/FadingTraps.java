@@ -2,36 +2,27 @@ package com.shatteredpixel.shatteredpixeldungeon.tiles;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
-import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.watabou.noosa.Tilemap;
 import com.watabou.noosa.tweeners.AlphaTweener;
-import com.watabou.utils.Rect;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.Arrays;
 
 public class FadingTraps extends CustomTilemap {
-    public static FadingTraps instance;
 
     {
         texture = Assets.Environment.TERRAIN_FEATURES;
     }
 
-    int[] data;
-    float fadeDelay = 2f;
     @Override
     public Tilemap create() {
         Tilemap v = super.create();
         if (data == null) {
             data = new int[tileW * tileH];
             Arrays.fill(data, -1);
+            v.map(data, tileW);
+            v.alpha(alpha);
         }
-        v.map(data, tileW);
         return v;
     }
 
@@ -53,45 +44,28 @@ public class FadingTraps extends CustomTilemap {
         return super.desc(tileX, tileY);
     }
 
-    private void remove() {
+    public void fade() {
+        runFadeAction();
+    }
+
+    private void runFadeAction() {
+        Dungeon.level.customTiles.remove(this);
+        if (vis != null && vis.parent != null) {
+            vis.parent.add(new AlphaTweener(vis, 0f, 2f) {
+                @Override
+                protected void onComplete() {
+                    super.onComplete();
+                    finishFade();
+                }
+            });
+        } else {
+            finishFade();
+        }
+    }
+
+    private void finishFade() {
         if (vis != null) {
             vis.killAndErase();
         }
-        Dungeon.level.customTiles.remove(this);
-    }
-    public static void fromJSON(JSONObject object){
-        if (object.has("kill")){
-            instance.remove();
-            instance = null;
-            return;
-        }
-        boolean newInstance = object.getBoolean("new");
-        if (newInstance){
-            if (instance != null){
-                instance.remove();
-                instance = null;
-            }
-        }
-        if (instance == null) {
-            instance = new FadingTraps();
-        }
-        instance.tileX = object.getInt("tileX");
-        instance.tileY = object.getInt("tileY");
-        instance.tileH = object.getInt("tileH");
-        instance.tileW = object.getInt("tileW");
-        JSONArray trapData = object.getJSONArray("data");
-        JSONObject trapObject;
-        instance.data = new int[trapData.length()];
-        for (int i = 0; i < trapData.length(); i++) {
-            trapObject = trapData.getJSONObject(i);
-            instance.data[trapObject.getInt("pos")] = trapObject.getInt("data");
-            instance.fadeDelay = 2f;
-
-        }
-        if (newInstance) {
-            GameScene.add(instance, false);
-            Dungeon.level.customTiles.add(instance);
-        }
-        instance.vis.alpha((float) object.getDouble("alpha"));
     }
 }
