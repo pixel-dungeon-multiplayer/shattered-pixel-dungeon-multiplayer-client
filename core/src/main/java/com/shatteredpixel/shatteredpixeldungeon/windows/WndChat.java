@@ -1,7 +1,6 @@
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
-import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
-import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.SendData;
 
 public class WndChat extends WndTextInput {
 

@@ -21,7 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon;
 
-import com.nikita22007.pixeldungeonmultiplayer.TextureManager;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.textures.TextureManager;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.TitleScene;

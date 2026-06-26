@@ -22,8 +22,8 @@
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
 import com.shatteredpixel.shatteredpixeldungeon.items.CustomItem;
-import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
-import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.JsonStringHelper;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.SendData;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CustomCharSprite;
@@ -39,7 +39,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static com.shatteredpixel.shatteredpixeldungeon.network.ParseThread.ToPascalCase;
+import static io.github.pixeldungeonmultiplayer.shattered.client.network.ParseThread.ToPascalCase;
 
 public class WndOptions extends Window {
 

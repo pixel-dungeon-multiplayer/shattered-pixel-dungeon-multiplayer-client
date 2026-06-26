@@ -23,8 +23,8 @@ package com.shatteredpixel.shatteredpixeldungeon.messages;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.I18NBundle;
-import com.nikita22007.multiplayer.utils.text.LocalizedKey;
-import com.nikita22007.multiplayer.utils.text.LocalizedString;
+import io.github.pixeldungeonmultiplayer.common.localizedstring.LocalizedKey;
+import io.github.pixeldungeonmultiplayer.common.localizedstring.LocalizedString;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;

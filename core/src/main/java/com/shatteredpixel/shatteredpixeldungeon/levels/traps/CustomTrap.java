@@ -1,10 +1,10 @@
 package com.shatteredpixel.shatteredpixeldungeon.levels.traps;
 
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.JsonStringHelper;
 import org.json.JSONObject;
 
-//todo should we reuse it in com.shatteredpixel.shatteredpixeldungeon.network.actions.traps.TrapUpdateParser?
+//todo should we reuse it in io.github.pixeldungeonmultiplayer.shattered.server.traps.actions.network.TrapUpdateParser?
 public class CustomTrap extends Trap {
     {
         visible = true;

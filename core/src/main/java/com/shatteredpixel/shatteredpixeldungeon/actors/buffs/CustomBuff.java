@@ -1,16 +1,14 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
-import com.nikita22007.multiplayer.utils.text.LocalizedString;
-import com.shatteredpixel.shatteredpixeldungeon.network.text.LocalizedStringParser;
-import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
+import io.github.pixeldungeonmultiplayer.common.localizedstring.LocalizedString;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.text.LocalizedStringParser;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.JsonStringHelper;
 import com.watabou.noosa.Image;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Constructor;
-
-import static com.nikita22007.pixeldungeonmultiplayer.TranslationUtils.translateBuffIcon;
-import static com.shatteredpixel.shatteredpixeldungeon.network.ParseThread.isConnectedToOldServer;
+import static io.github.pixeldungeonmultiplayer.shattered.client.network.utils.TranslationUtils.translateBuffIcon;
+import static io.github.pixeldungeonmultiplayer.shattered.client.network.ParseThread.isConnectedToOldServer;
 
 public class CustomBuff extends Buff {
     private int icon = 0;

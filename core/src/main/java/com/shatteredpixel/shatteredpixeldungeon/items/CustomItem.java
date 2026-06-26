@@ -4,29 +4,24 @@ import java.util.ArrayList;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.CustomBag;
-import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
-import com.shatteredpixel.shatteredpixeldungeon.network.ParticleFactoryDeserializer;
-import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
-import com.shatteredpixel.shatteredpixeldungeon.network.actions.emitters.EmitterAnchorParser;
-import com.shatteredpixel.shatteredpixeldungeon.network.actions.emitters.EmitterParser;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.JsonStringHelper;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.SendData;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.emitters.EmitterParser;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 
 import com.watabou.noosa.ColorBlock;
-import com.watabou.noosa.Visual;
 import com.watabou.noosa.particles.Emitter;
-import com.nikita22007.multiplayer.utils.text.LocalizedString;
+import io.github.pixeldungeonmultiplayer.common.localizedstring.LocalizedString;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
-import static com.nikita22007.pixeldungeonmultiplayer.TranslationUtils.translateItemImage;
-import static com.shatteredpixel.shatteredpixeldungeon.network.ParseThread.isConnectedToOldServer;
+import static io.github.pixeldungeonmultiplayer.shattered.client.network.utils.TranslationUtils.translateItemImage;
+import static io.github.pixeldungeonmultiplayer.shattered.client.network.ParseThread.isConnectedToOldServer;
 
 public class CustomItem extends Item {
     protected String name = "";

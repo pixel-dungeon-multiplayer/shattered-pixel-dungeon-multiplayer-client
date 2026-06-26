@@ -28,7 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.network.SendData;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.SendData;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -54,7 +54,7 @@ import org.json.JSONArray;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.nikita22007.pixeldungeonmultiplayer.Utils.parseArrayOfPath;
+import static io.github.pixeldungeonmultiplayer.shattered.client.network.utils.Utils.parseArrayOfPath;
 
 public class WndBag extends WndTabbed {
 	

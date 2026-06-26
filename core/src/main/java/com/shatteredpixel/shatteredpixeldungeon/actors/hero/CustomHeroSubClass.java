@@ -1,6 +1,6 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero;
 
-import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.JsonStringHelper;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;

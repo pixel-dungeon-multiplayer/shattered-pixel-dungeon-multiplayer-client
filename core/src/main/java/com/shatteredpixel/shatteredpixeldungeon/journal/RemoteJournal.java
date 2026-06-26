@@ -2,10 +2,10 @@ package com.shatteredpixel.shatteredpixeldungeon.journal;
 
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.CustomItem;
-import com.nikita22007.multiplayer.utils.text.LocalizedString;
-import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
-import com.shatteredpixel.shatteredpixeldungeon.network.JSONObjectDiff;
-import com.shatteredpixel.shatteredpixeldungeon.network.text.LocalizedStringParser;
+import io.github.pixeldungeonmultiplayer.common.localizedstring.LocalizedString;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.JsonStringHelper;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.JSONObjectDiff;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.text.LocalizedStringParser;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

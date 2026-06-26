@@ -21,11 +21,11 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.sprites;
 
-import com.nikita22007.pixeldungeonmultiplayer.TranslationUtils;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.utils.TranslationUtils;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.JsonStringHelper;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.watabou.noosa.Visual;
@@ -38,7 +38,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
-import static com.shatteredpixel.shatteredpixeldungeon.network.ParseThread.isConnectedToOldServer;
+import static io.github.pixeldungeonmultiplayer.shattered.client.network.ParseThread.isConnectedToOldServer;
 
 public class MissileSprite extends ItemSprite implements Tweener.Listener {
 

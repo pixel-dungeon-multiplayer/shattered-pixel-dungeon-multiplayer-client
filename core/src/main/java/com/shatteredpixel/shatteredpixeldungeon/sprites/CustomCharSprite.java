@@ -1,10 +1,10 @@
 package com.shatteredpixel.shatteredpixeldungeon.sprites;
 
-import static com.nikita22007.pixeldungeonmultiplayer.JavaUtils.hasNotNull;
+import static io.github.pixeldungeonmultiplayer.shattered.client.network.utils.JavaUtils.hasNotNull;
 
-import com.nikita22007.pixeldungeonmultiplayer.JavaUtils;
-import com.nikita22007.pixeldungeonmultiplayer.TextureManager;
-import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.utils.JavaUtils;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.textures.TextureManager;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.JsonStringHelper;
 import com.watabou.gltextures.SmartTexture;
 import com.watabou.gltextures.TextureCache;
 import com.watabou.noosa.TextureFilm;

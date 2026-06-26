@@ -43,7 +43,7 @@ import com.watabou.utils.Point;
 import com.watabou.utils.PointF;
 import com.watabou.utils.Signal;
 
-import static com.shatteredpixel.shatteredpixeldungeon.network.SendData.SendCellListenerCell;
+import static io.github.pixeldungeonmultiplayer.shattered.client.network.SendData.SendCellListenerCell;
 
 public class CellSelector extends ScrollArea {
 

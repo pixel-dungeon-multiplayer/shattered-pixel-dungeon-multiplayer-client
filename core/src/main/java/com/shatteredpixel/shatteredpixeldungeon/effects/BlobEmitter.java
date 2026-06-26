@@ -25,7 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.watabou.noosa.particles.Emitter;
-import com.shatteredpixel.shatteredpixeldungeon.network.actions.emitters.EmitterParser;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.emitters.EmitterParser;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Random;
 import com.watabou.utils.RectF;

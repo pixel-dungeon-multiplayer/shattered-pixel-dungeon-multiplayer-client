@@ -1,10 +1,8 @@
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
-import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
-import com.shatteredpixel.shatteredpixeldungeon.network.Client;
-import com.shatteredpixel.shatteredpixeldungeon.network.NetworkScanner;
-import com.shatteredpixel.shatteredpixeldungeon.network.scanners.ServerInfo;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.HeroSelectScene;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.Client;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.NetworkScanner;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.scanners.ServerInfo;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.StartScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;

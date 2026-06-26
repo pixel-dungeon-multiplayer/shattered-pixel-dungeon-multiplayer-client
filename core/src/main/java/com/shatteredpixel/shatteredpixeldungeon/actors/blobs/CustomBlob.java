@@ -1,13 +1,10 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.blobs;
 
-import com.nikita22007.pixeldungeonmultiplayer.JavaUtils;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.utils.JavaUtils;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
-import com.shatteredpixel.shatteredpixeldungeon.network.JsonStringHelper;
-import com.shatteredpixel.shatteredpixeldungeon.network.actions.emitters.RectParser;
-import com.watabou.utils.RectF;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.JsonStringHelper;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
