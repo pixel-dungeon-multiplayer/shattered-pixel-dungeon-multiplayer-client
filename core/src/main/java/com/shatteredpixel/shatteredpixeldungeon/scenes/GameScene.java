@@ -870,7 +870,7 @@ public class GameScene extends PixelScene {
 
 	public static void updateCharSprite(Char chr, CharSprite newSprite) {
 		if (scene == null) {
-			newSprite.link(chr);
+			chr.sprite = newSprite;
 			return;
 		}
 		if (chr instanceof Mob) {
