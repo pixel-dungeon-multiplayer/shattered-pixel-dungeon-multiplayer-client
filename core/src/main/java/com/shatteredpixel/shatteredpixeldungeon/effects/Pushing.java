@@ -65,7 +65,7 @@ public class Pushing extends Actor {
 	}
 	
 	@Override
-	protected boolean act() {
+    public boolean act() {
 		Actor.remove( Pushing.this );
 
 		if (sprite != null && sprite.parent != null) {
