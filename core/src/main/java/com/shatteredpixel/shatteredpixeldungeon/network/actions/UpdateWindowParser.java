@@ -149,8 +149,13 @@ public class UpdateWindowParser implements ActionParser {
             e.printStackTrace(pw);
             String sStackTrace = sw.toString(); // stack trace as a string
             Log.e("parse_window", String.format("bad_window. %s\n%s", e.getMessage(), sStackTrace));
+            Log.e("parse_window", String.format(windowObj.toString(4)));
+            WndError wndError = new WndError("Press \"back\" button to hide broken window.\n" + e + "\n" + sStackTrace);
+            wndError.setId(windowObj.optInt("id", -1));
+            showWnd(wndError);
         }
     }
+
     private void showWnd(@NotNull Window window) {
         if (Game.scene() instanceof GameScene) {
             GameScene.show(window);
