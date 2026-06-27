@@ -132,27 +132,31 @@ public class WndDialog extends Window {
 				}
 			};
 			button.multiline = true;
+			button.leftJustify = action.leftJustify;
 			if (action.icon != null) {
 				button.icon(action.icon);
 			}
 			button.enable(action.enabled);
 			add(button);
 
+			float wBtn = action.hasInfo ? (width - BUTTON_HEIGHT) : width;
+			button.setSize(wBtn, 0);
+			float h = Math.max(BUTTON_HEIGHT, button.reqHeight() + 2);
 			if (action.hasInfo) {
-				button.setRect(0, pos, width - BUTTON_HEIGHT, BUTTON_HEIGHT);
+				button.setRect(0, pos, wBtn, h);
 				IconButton info = new IconButton(Icons.get(Icons.INFO)) {
 					@Override
 					protected void onClick() {
 						sendInfo(index);
 					}
 				};
-				info.setRect(width - BUTTON_HEIGHT, pos, BUTTON_HEIGHT, BUTTON_HEIGHT);
+				info.setRect(width - BUTTON_HEIGHT, pos + (h - BUTTON_HEIGHT) / 2f, BUTTON_HEIGHT, BUTTON_HEIGHT);
 				info.enable(action.enabled);
 				add(info);
 			} else {
-				button.setRect(0, pos, width, BUTTON_HEIGHT);
+				button.setRect(0, pos, wBtn, h);
 			}
-			pos += BUTTON_HEIGHT + GAP;
+			pos += h + GAP;
 		}
 
 		resize(width, (int)(pos - GAP));
@@ -328,6 +332,7 @@ public class WndDialog extends Window {
 		final boolean enabled;
 		final @Nullable Image icon;
 		final int fontSize;
+		final boolean leftJustify;
 
 		ActionData(@NotNull JSONObject object) throws JSONException {
 			text = JsonStringHelper.optString(object, "text", "");
@@ -335,6 +340,7 @@ public class WndDialog extends Window {
 			enabled = object.optBoolean("enabled", true);
 			icon = DialogIconParser.parseImage(object.optJSONObject("icon"));
 			fontSize = object.optInt("font_size", 9);
+			leftJustify = object.optBoolean("left_justify", false);
 		}
 
 		static @NotNull ActionData @NotNull [] parseArray(@Nullable JSONArray array) throws JSONException {
