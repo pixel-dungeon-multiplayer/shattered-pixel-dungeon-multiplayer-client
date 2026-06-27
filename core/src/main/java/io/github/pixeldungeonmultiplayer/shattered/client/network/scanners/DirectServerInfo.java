@@ -22,6 +22,9 @@ public class DirectServerInfo extends ServerInfo {
 
     @Override
     public ServerAddress getAddress() {
+        if (IP == null) {
+            return null;
+        }
         ServerAddress address = new ServerAddress();
         address.host = IP.getHostAddress();
         address.port = port;

@@ -29,6 +29,7 @@ public class UserServerInfo extends ServerInfo{
         this.haveChallenges = serverInfo.getInt("challenges") > 0;
         this.IP = address.getAddress();
         this.port = address.getPort();
+        this.serverId = serverInfo.optString("server_id", null);
         this.motd = serverInfo.optString("motd", null);
         this.players = serverInfo.getInt("players");
         this.maxPlayers = serverInfo.getInt("max_players");
@@ -39,6 +40,9 @@ public class UserServerInfo extends ServerInfo{
     }
     @Override
     public ServerAddress getAddress() {
+        if (IP == null) {
+            return null;
+        }
         ServerAddress address = new ServerAddress();
         address.host = IP.getHostAddress();
         address.port = port;

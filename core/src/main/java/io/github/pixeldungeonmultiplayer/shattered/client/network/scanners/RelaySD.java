@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class RelaySD extends Thread implements ServiceDiscovery {
+public class RelaySD extends Thread implements ServiceDiscovery, ServerDiscoverySource {
 
     private static final String CHARSET = "UTF-8";
     private static final int DELAY = 3000;
@@ -31,6 +31,7 @@ public class RelaySD extends Thread implements ServiceDiscovery {
     private BufferedReader reader;
     protected Socket relaySocket;
 
+    private final Object serversLock = new Object();
     private List<ServerInfo> servers = new ArrayList<>();
     ServiceDiscoveryListener listener;
     private final Protocol protocol;
@@ -150,6 +151,7 @@ public class RelaySD extends Thread implements ServiceDiscovery {
                     serverInfo.optInt("max_players", 0),
                     serverInfo.optInt("challenges", 0) > 0
             );
+            info.serverId = JsonStringHelper.optString(serverInfo, "server_id", null);
             info.currentFloor = serverInfo.optInt("current_floor", 0);
             info.motd = serverInfo.optString("motd", null);
             info.serverVersion = JsonStringHelper.optString(infoObj, "server_version", serverInfo.optString("server_version", null));
@@ -157,8 +159,12 @@ public class RelaySD extends Thread implements ServiceDiscovery {
             info.serverProtocolVersion = infoObj.optInt("server_protocol_version", serverInfo.optInt("server_protocol_version", 0));
             serverAddresses.add(info);
         }
-        servers = serverAddresses;
-        listener.onServiceFound(null);
+        synchronized (serversLock) {
+            servers = serverAddresses;
+        }
+        if (listener != null) {
+            listener.onServiceFound(null);
+        }
     }
 
     public boolean started() {
@@ -177,7 +183,9 @@ public class RelaySD extends Thread implements ServiceDiscovery {
     }
 
     public List<ServerInfo> getServerList() {
-        return servers;
+        synchronized (serversLock) {
+            return new ArrayList<>(servers);
+        }
     }
 
     public int getPortForServerID(int id) {
