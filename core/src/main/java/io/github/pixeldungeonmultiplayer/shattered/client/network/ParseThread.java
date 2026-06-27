@@ -795,7 +795,7 @@ public class ParseThread implements Callable<String> {
                 continue;
             }
             String type = JsonStringHelper.optString(actionObj, "action_name", actionObj.optString("action_type"));
-            if ("sprite_action".equals(type)) {
+            if ("sprite_action".equals(type) && false) {
                 spriteActions.add(actionObj);
                 continue;
             }
