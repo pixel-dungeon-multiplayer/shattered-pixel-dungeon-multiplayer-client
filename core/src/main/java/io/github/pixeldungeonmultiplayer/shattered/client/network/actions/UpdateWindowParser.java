@@ -142,7 +142,7 @@ public class UpdateWindowParser implements ActionParser {
                     Log.e("parse_window", String.format("incorrect window type: %s", type));
                 }
             }
-        } catch (NullPointerException e) {
+        } catch (NullPointerException|JSONException e ) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
