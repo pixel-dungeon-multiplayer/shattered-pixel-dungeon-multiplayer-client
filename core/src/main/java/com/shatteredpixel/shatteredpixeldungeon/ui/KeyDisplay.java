@@ -50,8 +50,8 @@ public class KeyDisplay extends Visual {
 	
 	private SmartTexture tx = TextureCache.get(Assets.Interfaces.MENU_BTN);
 	
-	private boolean dirty = true;
-	private int[] keys;
+	private static boolean dirty = true;
+	private static int[] keys;
 	
 	//mapping of key types to slots in the array, 0 is reserved for black (missed) keys
 	//this also determines the order these keys will appear (lower first)
@@ -64,38 +64,20 @@ public class KeyDisplay extends Visual {
 		keyMap.put(IronKey.class, 4);
 	}
 	
-	private int totalKeys = 0;
+	private static int totalKeys = 0;
 	
 	public KeyDisplay() {
 		super(0, 0, 0, 0);
 	}
-	
-	public void updateKeys(){
-		keys = new int[keyMap.size()+1];
-		
-		for (Notes.KeyRecord rec : Notes.getRecords(Notes.KeyRecord.class)){
-			if (rec.depth() < Dungeon.depth){
-				//only ever 1 black key
-				keys[0] = 1;
-			} else if (rec.depth() == Dungeon.depth){
-				keys[keyMap.get(rec.type())] += rec.quantity();
-			}
-		}
-		
-		totalKeys = 0;
-		for (int k : keys){
-			totalKeys += k;
-		}
-		dirty = true;
-	}
-	public void updateKeys(JSONArray keys){
-		this.keys = new int[keyMap.size()+1];
+
+	public static void updateKeys(JSONArray keysarr){
+		keys = new int[keysarr.length()];
 
 
 		totalKeys = 0;
-		for (int i = 0; i < keys.length(); i++) {
-			int key = keys.getInt(i);
-			this.keys[i] = key;
+		for (int i = 0; i < keysarr.length(); i++) {
+			int key = keysarr.getInt(i);
+			keys[i] = key;
 			totalKeys+= key;
 		}
 		dirty = true;

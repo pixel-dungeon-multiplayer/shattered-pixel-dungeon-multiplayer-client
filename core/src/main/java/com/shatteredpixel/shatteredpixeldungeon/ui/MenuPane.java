@@ -310,7 +310,6 @@ public class MenuPane extends Component {
 		}
 
 		public void updateKeyDisplay() {
-			keyIcon.updateKeys();
 			keyIcon.visible = keyIcon.keyCount() > 0;
 			journalIcon.visible = !keyIcon.visible;
 			if (keyIcon.keyCount() > 0) {
