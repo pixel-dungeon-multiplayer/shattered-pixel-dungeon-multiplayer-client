@@ -1,7 +1,7 @@
 package com.watabou.network;
 
 public abstract class ServiceInfoHandler {
-    protected static final String[] serviceTypes = new String[]{"_spdmp._tcp.", "_mppd._tcp."};
+    protected static final String[] serviceTypes = new String[]{"_spdmp._tcp."/*, "_mppd._tcp."*/};
 
     protected final ServiceInfoListener listener;
     public abstract void startDiscovery();

@@ -5,14 +5,15 @@ import com.watabou.network.ServiceInfo;
 import com.watabou.network.ServiceInfoHandler;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.scanners.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class NetworkScanner {
     protected static NetworkScannerListener scannerListener;
-    protected static RelaySD relayServer = null;
-    protected static RelaySD legacyRelayServer = null;
+    protected static @Nullable RelaySD relayServer = null;
+    protected static @Nullable RelaySD legacyRelayServer = null;
     protected static ServerListScanner serverListScanner;
     protected static ServiceInfoListener serviceInfoListener = new ServiceInfoListener();
     protected static ServiceInfoHandler serviceInfoHandler = ShatteredPixelDungeon.platform.createServiceInfoHandler(serviceInfoListener);
@@ -27,8 +28,8 @@ public class NetworkScanner {
         if (ShatteredPixelDungeon.onlineMode()) {
             relayServer = new RelaySD(RelaySD.Protocol.V2, RelaySD.getRelayAddress(), RelaySD.getNewRelayPort());
             res &= relayServer.startDiscovery(listener);
-            legacyRelayServer = new RelaySD(RelaySD.Protocol.V1, RelaySD.getRelayAddress(), com.shatteredpixel.shatteredpixeldungeon.SPDSettings.legacyRelayServerPort);
-            res &= legacyRelayServer.startDiscovery(listener);
+            //legacyRelayServer = new RelaySD(RelaySD.Protocol.V1, RelaySD.getRelayAddress(), com.shatteredpixel.shatteredpixeldungeon.SPDSettings.legacyRelayServerPort);
+            //res &= legacyRelayServer.startDiscovery(listener);
         }
         return res;
     }
