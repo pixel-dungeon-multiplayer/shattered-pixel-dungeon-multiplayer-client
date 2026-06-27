@@ -1,6 +1,29 @@
 apply plugin: 'com.android.application'
 
+def androidKeystoreFile = System.getenv("ANDROID_KEYSTORE_FILE")
+def androidKeystorePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+def androidKeyAlias = System.getenv("ANDROID_KEY_ALIAS")
+def androidKeyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+
+def hasReleaseSigning =
+        androidKeystoreFile != null && !androidKeystoreFile.isBlank() &&
+                androidKeystorePassword != null && !androidKeystorePassword.isBlank() &&
+                androidKeyAlias != null && !androidKeyAlias.isBlank() &&
+                androidKeyPassword != null && !androidKeyPassword.isBlank()
+
+
 android {
+    signingConfigs {
+        release {
+            if (hasReleaseSigning) {
+                storeFile = file(androidKeystoreFile)
+                storePassword = androidKeystorePassword
+                keyAlias = androidKeyAlias
+                keyPassword = androidKeyPassword
+            }
+        }
+    }
+
     namespace 'com.shatteredpixel.shatteredpixeldungeon.android'
     compileSdk appAndroidCompileSDK
     compileOptions.sourceCompatibility = compileOptions.targetCompatibility = appJavaCompatibility
@@ -34,6 +57,8 @@ android {
             shrinkResources true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            signingConfig = hasReleaseSigning ? signingConfigs.release : signingConfigs.debug
         }
     }
 

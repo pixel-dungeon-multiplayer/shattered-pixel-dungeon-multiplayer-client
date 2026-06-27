@@ -1,0 +1,429 @@
+name: Build and release
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  JAVA_VERSION: "17"
+
+  SNAPSHOT_TAG: "latest-snapshot"
+  SNAPSHOT_TITLE: "Latest Snapshot"
+
+  DESKTOP_GRADLE_TASK: ":desktop:release"
+  ANDROID_GRADLE_TASK: ":android:assembleRelease"
+
+  STABLE_TAG_PATTERN: "v[0-9]*"
+
+jobs:
+  prepare:
+    name: Prepare metadata
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      build_label: ${{ steps.meta.outputs.build_label }}
+      asset_suffix: ${{ steps.meta.outputs.asset_suffix }}
+      is_tag_release: ${{ steps.meta.outputs.is_tag_release }}
+      release_tag: ${{ steps.meta.outputs.release_tag }}
+      release_title: ${{ steps.meta.outputs.release_title }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Prepare version metadata
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            APP_VERSION="${GITHUB_REF_NAME}"
+            BUILD_LABEL="${GITHUB_REF_NAME}"
+
+            echo "is_tag_release=true" >> "$GITHUB_OUTPUT"
+            echo "release_tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            echo "release_title=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          else
+            BUILD_LABEL="snapshot-${GITHUB_RUN_NUMBER}"
+            APP_VERSION="$BUILD_LABEL"
+
+            echo "is_tag_release=false" >> "$GITHUB_OUTPUT"
+            echo "release_tag=${SNAPSHOT_TAG}" >> "$GITHUB_OUTPUT"
+            echo "release_title=${SNAPSHOT_TITLE}" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "version=$APP_VERSION" >> "$GITHUB_OUTPUT"
+          echo "build_label=$BUILD_LABEL" >> "$GITHUB_OUTPUT"
+          echo "asset_suffix=$BUILD_LABEL" >> "$GITHUB_OUTPUT"
+
+          echo "APP_VERSION=$APP_VERSION"
+          echo "BUILD_LABEL=$BUILD_LABEL"
+
+  build-desktop:
+    name: Desktop server JAR
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build desktop
+        shell: bash
+        env:
+          APP_VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew $DESKTOP_GRADLE_TASK
+
+      - name: Collect desktop artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p release-artifacts
+
+          mapfile -d '' files < <(
+            find desktop/build/libs -maxdepth 1 -type f -name "*.jar" -print0
+          )
+
+          if (( ${#files[@]} == 0 )); then
+            echo "No desktop JAR found in desktop/build/libs"
+            find desktop/build -type f || true
+            exit 1
+          fi
+
+          if (( ${#files[@]} > 1 )); then
+            echo "More than one desktop JAR found:"
+            printf '  %s\n' "${files[@]}"
+            exit 1
+          fi
+
+          cp -v "${files[0]}" release-artifacts/
+
+      - name: Upload desktop artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-desktop
+          path: release-artifacts/
+          if-no-files-found: error
+
+  build-android:
+    name: Android signed APK
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Validate Android signing secrets
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          
+          if [[ -z "$ANDROID_KEYSTORE_BASE64" ||
+                -z "$ANDROID_KEYSTORE_PASSWORD" ||
+                -z "$ANDROID_KEY_ALIAS" ||
+                -z "$ANDROID_KEY_PASSWORD" ]]; then
+            echo "Android signing secrets are missing"
+            exit 1
+          fi
+
+      - name: Decode Android keystore
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/release.keystore"
+
+      - name: Build signed Android APK
+        shell: bash
+        env:
+          APP_VERSION: ${{ needs.prepare.outputs.version }}
+          ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/release.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew $ANDROID_GRADLE_TASK
+
+      - name: Collect Android artifacts
+        shell: bash
+        env:
+          ASSET_SUFFIX: ${{ needs.prepare.outputs.asset_suffix }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p release-artifacts
+
+          index=0
+
+          while IFS= read -r -d '' file; do
+            base="$(basename "$file")"
+
+            case "$base" in
+              *.apk) ext="apk" ;;
+              *.aab) ext="aab" ;;
+              *) ext="${base##*.}" ;;
+            esac
+
+            index=$((index + 1))
+
+            if [[ "$index" -eq 1 ]]; then
+              target="android-server-${ASSET_SUFFIX}.${ext}"
+            else
+              target="android-server-${ASSET_SUFFIX}-${index}.${ext}"
+            fi
+
+            cp -v "$file" "release-artifacts/$target"
+          done < <(
+            find . -type f \
+              \( -path "*/build/outputs/apk/release/*.apk" \
+              -o -path "*/build/outputs/bundle/release/*.aab" \) \
+              -print0
+          )
+
+          if ! find release-artifacts -type f | grep -q .; then
+            echo "No Android release artifacts found. Check ANDROID_GRADLE_TASK and Android output paths."
+            exit 1
+          fi
+
+      - name: Upload Android artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-android
+          path: release-artifacts/
+          if-no-files-found: error
+
+  publish:
+    name: Publish release
+    needs:
+      - prepare
+      - build-desktop
+      - build-android
+
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Fetch tags
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --force --tags origin
+
+      - name: Download produced build artifacts
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p downloaded upload
+
+          gh run download "$GITHUB_RUN_ID" \
+            --pattern "dist-*" \
+            --dir downloaded || true
+
+          echo "Downloaded files:"
+          find downloaded -type f -print || true
+
+          while IFS= read -r -d '' file; do
+            cp -v "$file" "upload/$(basename "$file")"
+          done < <(find downloaded -type f -print0)
+
+      - name: Check whether anything was built
+        id: artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if find upload -type f | grep -q .; then
+            echo "has_artifacts=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_artifacts=false" >> "$GITHUB_OUTPUT"
+            echo "No artifacts produced by any build. Release will not be published."
+          fi
+
+      - name: Generate changelog
+        if: steps.artifacts.outputs.has_artifacts == 'true'
+        shell: bash
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          IS_TAG_RELEASE: ${{ needs.prepare.outputs.is_tag_release }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.release_tag }}
+          RELEASE_TITLE: ${{ needs.prepare.outputs.release_title }}
+        run: |
+          set -euo pipefail
+
+          CURRENT_SHA="$GITHUB_SHA"
+
+          {
+            echo "# ${RELEASE_TITLE}"
+            echo
+            echo "Version: \`${VERSION}\`"
+            echo
+            echo "Commit: \`${CURRENT_SHA}\`"
+            echo
+            echo "## Build artifacts"
+            echo
+            find upload -type f -exec basename {} \; | sort | sed 's/^/- /'
+            echo
+            echo "## Changelog"
+            echo
+          } > CHANGELOG.md
+
+          if [[ "$IS_TAG_RELEASE" == "true" ]]; then
+            CURRENT_TAG="$RELEASE_TAG"
+            CURRENT_TAG_COMMIT="$(git rev-list -n 1 "$CURRENT_TAG")"
+
+            PREVIOUS_TAG="$(
+              git describe \
+                --tags \
+                --match "$STABLE_TAG_PATTERN" \
+                --abbrev=0 \
+                "${CURRENT_TAG_COMMIT}^" 2>/dev/null || true
+            )"
+
+            if [[ -n "$PREVIOUS_TAG" ]]; then
+              {
+                echo "Changes since \`${PREVIOUS_TAG}\`:"
+                echo
+                git log --no-merges --pretty=format:'- %s (`%h`)' "${PREVIOUS_TAG}..${CURRENT_TAG}" || true
+                echo
+                echo
+                echo "Range: \`${PREVIOUS_TAG}..${CURRENT_TAG}\`"
+              } >> CHANGELOG.md
+            else
+              {
+                echo "First stable release."
+                echo
+                git log --no-merges --pretty=format:'- %s (`%h`)' "$CURRENT_TAG" || true
+              } >> CHANGELOG.md
+            fi
+          else
+            PREVIOUS_SNAPSHOT_COMMIT="$(
+              git rev-parse "refs/tags/${SNAPSHOT_TAG}^{commit}" 2>/dev/null || true
+            )"
+
+            if [[ -n "$PREVIOUS_SNAPSHOT_COMMIT" ]]; then
+              {
+                echo "Changes since previous \`${SNAPSHOT_TAG}\`:"
+                echo
+                git log --no-merges --pretty=format:'- %s (`%h`)' "${PREVIOUS_SNAPSHOT_COMMIT}..${CURRENT_SHA}" || true
+                echo
+                echo
+                echo "Range: \`${PREVIOUS_SNAPSHOT_COMMIT}..${CURRENT_SHA}\`"
+              } >> CHANGELOG.md
+            else
+              {
+                echo "First snapshot build."
+                echo
+                git log --no-merges --pretty=format:'- %s (`%h`)' "$CURRENT_SHA" || true
+              } >> CHANGELOG.md
+            fi
+          fi
+
+          cp CHANGELOG.md upload/CHANGELOG.md
+          cat CHANGELOG.md
+
+      - name: Publish stable tag release
+        if: steps.artifacts.outputs.has_artifacts == 'true' && needs.prepare.outputs.is_tag_release == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.release_tag }}
+          RELEASE_TITLE: ${{ needs.prepare.outputs.release_title }}
+        run: |
+          set -euo pipefail
+
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Release '$RELEASE_TAG' already exists. Delete it manually if you want to republish."
+            exit 1
+          fi
+
+          gh release create "$RELEASE_TAG" \
+            upload/* \
+            --title "$RELEASE_TITLE" \
+            --notes-file CHANGELOG.md \
+            --verify-tag \
+            --latest
+
+      - name: Move latest-snapshot tag
+        if: steps.artifacts.outputs.has_artifacts == 'true' && needs.prepare.outputs.is_tag_release != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git tag -f "$SNAPSHOT_TAG" "$GITHUB_SHA"
+          git push origin "refs/tags/$SNAPSHOT_TAG" --force
+
+      - name: Recreate latest snapshot release
+        if: steps.artifacts.outputs.has_artifacts == 'true' && needs.prepare.outputs.is_tag_release != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if gh release view "$SNAPSHOT_TAG" >/dev/null 2>&1; then
+            gh release delete "$SNAPSHOT_TAG" -y
+          fi
+
+          gh release create "$SNAPSHOT_TAG" \
+            upload/* \
+            --title "$SNAPSHOT_TITLE" \
+            --notes-file CHANGELOG.md \
+            --prerelease \
+            --latest=false

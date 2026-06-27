@@ -9,28 +9,35 @@ buildscript {
 }
 
 // load version from file
-def versionFile = new File(rootProject.rootDir, "version")
 def versionName = "Local-build"
 
-if (versionFile.exists()) {
-    try {
-        versionName = versionFile.text.trim()
-    } catch (Exception e) {
-        println("Error reading version file: ${e.message}")
-    }
+def envVersion = System.getenv("APP_VERSION")
+
+if (envVersion != null && !envVersion.isBlank()) {
+    versionName = envVersion.trim()
 } else {
-    println("Version file not found, using default: 'Local-build'")
+    def versionFile = new File(rootProject.rootDir, "version")
+
+    if (versionFile.exists()) {
+        try {
+            versionName = versionFile.text.trim()
+        } catch (Exception e) {
+            println("Error reading version file: ${e.message}")
+        }
+    } else {
+        println("Version file not found, using default: 'Local-build'")
+    }
 }
 
 allprojects {
     ext {
         appName = 'Shattered Pixel Dungeon Client'
-        appPackageName = 'com.shatteredpixel.shatteredpixeldungeon.multiplayer.client'
+        appPackageName = 'io.github.pixeldungeonmultiplayer.shattered.client'
 
         appVersionCode = 891
         appVersionName = '3.3.6'
 
-        appVersionName = "Client_"+versionName + "_on_v"+appVersionName
+        appVersionName = "Client-"+versionName + "-on-v"+appVersionName
         appShortVersionName = ((appVersionName) =~ /\d+\.\d+\.\d+/) ? ((appVersionName) =~ /\d+\.\d+\.\d+/)[0] : "0.0.0"
 
         appJavaCompatibility = JavaVersion.VERSION_11
