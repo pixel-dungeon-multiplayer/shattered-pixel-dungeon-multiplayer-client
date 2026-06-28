@@ -58,7 +58,10 @@ public class DefaultActionParserRegistry {
         register(registry, "missile_sprite_visual", 1, new MissileSpriteVisualParser());
         register(registry, "checked_cell_visual", 1, new CheckedCellVisualParser());
         register(registry, "play_sample", 1, new PlaySampleParser());
-        register(registry, "music", 1, new MusicParser());
+        register(registry, "music_play", 1, new MusicParser());
+        register(registry, "music_play_tracks", 1, new MusicParser());
+        register(registry, "music_end", 1, new MusicParser());
+        register(registry, "music_fade_out", 1, new MusicParser());
         register(registry, "load_sample", 1, new LoadSampleParser());
         register(registry, "unload_sample", 1, new UnloadSampleParser());
         register(registry, "shake_camera", 1, new ShakeCameraParser());
