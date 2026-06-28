@@ -313,7 +313,7 @@ public enum Music {
 		//TODO SPDMP: move music action parsing out of SPD-classes into network actions/deserializers.
 		String type = actionObj.getString("action_name");
 		for (MusicAction action: actions) {
-			if (action.musicActionType().equals("music_" + type)) {
+			if (type.equals("music_" +action.musicActionType())) {
 				action.unpack(actionObj);
 				return action;
 			}
