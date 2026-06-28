@@ -34,14 +34,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public enum Music {
-	
+
 	INSTANCE;
-	
+
 	private com.badlogic.gdx.audio.Music player;
-	
+
 	private String lastPlayed;
 	private boolean looping;
-	
+
 	private boolean enabled = true;
 	private float volume = 1f;
 
@@ -53,21 +53,21 @@ public enum Music {
 	float[] trackChances;
 	private final ArrayList<String> trackQueue = new ArrayList<>();
 	boolean shuffle = false;
-	
+
 	public synchronized void play( String assetName, boolean looping ) {
 
 		//iOS cannot play ogg, so we use an mp3 alternative instead
 		if (assetName != null && DeviceCompat.isiOS()){
 			assetName = assetName.replace(".ogg", ".mp3");
 		}
-		
+
 		if (isPlaying() && lastPlayed != null && lastPlayed.equals( assetName )) {
 			player.setVolume(volumeWithFade());
 			return;
 		}
-		
+
 		stop();
-		
+
 		lastPlayed = assetName;
 		trackList = null;
 
@@ -232,7 +232,7 @@ public enum Music {
 			player = null;
 		}
 	}
-	
+
 	public synchronized void end() {
 		lastPlayed = null;
 		trackList = null;
@@ -244,14 +244,14 @@ public enum Music {
 	public synchronized boolean paused(){
 		return paused;
 	}
-	
+
 	public synchronized void pause() {
 		paused = true;
 		if (player != null) {
 			player.pause();
 		}
 	}
-	
+
 	public synchronized void resume() {
 		paused = false;
 		if (player != null) {
@@ -266,7 +266,7 @@ public enum Music {
 			player = null;
 		}
 	}
-	
+
 	public synchronized void volume( float value ) {
 		volume = value;
 		if (player != null) {
@@ -281,11 +281,11 @@ public enum Music {
 			return volume;
 		}
 	}
-	
+
 	public synchronized boolean isPlaying() {
 		return player != null && player.isPlaying();
 	}
-	
+
 	public synchronized void enable( boolean value ) {
 		enabled = value;
 		if (isPlaying() && !value) {
@@ -299,7 +299,7 @@ public enum Music {
 			}
 		}
 	}
-	
+
 	public synchronized boolean isEnabled() {
 		return enabled;
 	}
@@ -311,7 +311,7 @@ public enum Music {
 	};
     public MusicAction parseAction(JSONObject actionObj) {
 		//TODO SPDMP: move music action parsing out of SPD-classes into network actions/deserializers.
-		String type = actionObj.getString("music_action_type");
+		String type = actionObj.getString("action_name");
 		for (MusicAction action: actions) {
 			if (action.musicActionType().equals(type)) {
 				action.unpack(actionObj);
