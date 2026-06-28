@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.JSONObjectDiff;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.JsonStringHelper;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.SendData;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -65,9 +66,7 @@ public class WndClericSpells extends Window {
 		IconButton btnInfo = new IconButton(info ? new ItemSprite(ItemSpriteSheet.ARTIFACT_TOME) : Icons.INFO.get()){
 			@Override
 			protected void onClick() {
-				object.put("info", !info);
-				GameScene.show(new WndClericSpells(id, object));
-				hide();
+				SendData.sendWindowResult(getId(),0, new JSONObject().put("toggle_info", true));
 			}
 		};
 		btnInfo.setRect(WIDTH-16, 0, 16, 16);
@@ -176,7 +175,7 @@ public class WndClericSpells extends Window {
 			if (!info) {
 				hide();
 			}
-			SendData.sendWindowResult(WndClericSpells.this.id, spellID, new JSONObject().put("info", info));
+			SendData.sendWindowResult(WndClericSpells.this.id, spellID, new JSONObject().put("action", "click_spell"));
 		}
 		@Override
 		protected String hoverText() {
