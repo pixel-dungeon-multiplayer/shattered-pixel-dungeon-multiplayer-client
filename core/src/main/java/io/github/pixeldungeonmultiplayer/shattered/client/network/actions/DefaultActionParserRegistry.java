@@ -53,7 +53,6 @@ public class DefaultActionParserRegistry {
         ActionParserRegistry registry = new ActionParserRegistry();
         register(registry, "sprite_action", 1, new SpriteActionParser());
         register(registry, "sprite_flash", 1, new SpriteFlashParser());
-        register(registry, "show_status", 1, new ShowStatusParser());
         register(registry, "wound_visual", 1, (parseThread, action) -> Wound.hitWithTimeToFade(action.getInt("pos"), (float) action.getDouble("duration")));
         register(registry, "ripple_visual", 1, (parseThread, action) -> GameScene.ripple(action.getInt("pos")));
         register(registry, "missile_sprite_visual", 1, new MissileSpriteVisualParser());
@@ -81,6 +80,7 @@ public class DefaultActionParserRegistry {
         register(registry, "surprise_visual", 1, new SurpriseVisualParser());
         register(registry, "boss_health_bar", 1, new BossHealthBarParser());
         register(registry, "game_scene_flash", 1, new GameSceneFlashParser());
+        register(registry, "show_floating_text", 1, new ShowFloatingTextParser());
         register(registry, "custom_tilemap_add", 1, new CustomTilemapAddParser());
         register(registry, "custom_tilemap_remove", 1, new CustomTilemapRemoveParser());
         register(registry, "update_custom_tilemap", 1, new CustomTilemapUpdateParser());
