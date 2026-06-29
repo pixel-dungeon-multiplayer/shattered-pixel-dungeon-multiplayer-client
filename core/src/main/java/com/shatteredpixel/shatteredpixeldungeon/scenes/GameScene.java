@@ -42,6 +42,7 @@ import io.github.pixeldungeonmultiplayer.shattered.client.network.ParseThread;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.SendData;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSpriteFactory;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.DiscardedItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -868,19 +869,20 @@ public class GameScene extends PixelScene {
 		}
 	}
 
-	public static void updateCharSprite(Char chr, CharSprite newSprite) {
-		if (scene == null) {
-			chr.sprite = newSprite;
-			return;
-		}
+	public static void updateCharSprite(Char chr, CharSpriteFactory spriteFactory) {
 		if (chr instanceof Mob) {
-			((Mob) chr).spriteClass = newSprite.getClass();
+			((Mob) chr).spriteFactory = spriteFactory;
+			if (scene == null) {
+				return;
+			}
+			CharSprite newSprite = spriteFactory.create();
 			CharSprite oldSprite = chr.sprite;
-			scene.mobs.remove(oldSprite);
-			oldSprite.killAndErase();
+			if (oldSprite != null) {
+				scene.mobs.remove(oldSprite);
+				oldSprite.killAndErase();
+			}
 			chr.sprite = newSprite;
 			scene.addMobSprite((Mob) chr);
-			chr.sprite.link(chr);
 		} else {
 			GLog.n("trying on change sprite on char that is not mob");
 		}

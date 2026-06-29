@@ -2,7 +2,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 
 
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.MissingSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSpriteFactory;
 //FIXME
 public class CustomMob extends Mob {
     @Override
@@ -16,7 +16,7 @@ public class CustomMob extends Mob {
 
     public CustomMob(int id) {
         name = "unknown";
-        spriteClass = MissingSprite.class;
+        spriteFactory = CharSpriteFactory.missing("CustomMob.constructor", "actor was created before sprite data arrived");
 
         HP = HT = 1;
         defenseSkill = 1;

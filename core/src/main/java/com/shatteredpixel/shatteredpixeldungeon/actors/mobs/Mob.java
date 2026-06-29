@@ -26,8 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.MissingSprite;
-import com.watabou.utils.Reflection;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSpriteFactory;
 
 public abstract class Mob extends Char {
 
@@ -38,13 +37,12 @@ public abstract class Mob extends Char {
     }
 
 
-    public Class<? extends CharSprite> spriteClass;
+    public CharSpriteFactory spriteFactory = CharSpriteFactory.missing("Mob.spriteFactory", "mob has no sprite data yet");
 
     public int defenseSkill = 0;
 
     public CharSprite sprite() {
-        CharSprite sprite = spriteClass == null ? null : Reflection.newInstance(spriteClass);
-        return sprite == null ? new MissingSprite() : sprite;
+        return spriteFactory.create();
     }
 
     @Override

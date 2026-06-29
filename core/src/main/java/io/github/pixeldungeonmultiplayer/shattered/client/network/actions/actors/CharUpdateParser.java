@@ -23,7 +23,6 @@ import java.util.Set;
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.level;
 import static com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite.spriteClassFromName;
-import static com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite.spriteFromClass;
 import static io.github.pixeldungeonmultiplayer.shattered.client.network.actions.DefaultActionParserRegistry.payloadObject;
 import static io.github.pixeldungeonmultiplayer.shattered.client.network.utils.JavaUtils.hasNotNull;
 
@@ -43,50 +42,28 @@ public class CharUpdateParser implements ActionParser {
         } else {
             chr = (Char) actor;
         }
+        if (actorObj.has("position")) {
+            chr.pos = actorObj.getInt("position");
+        }
+        boolean wasInLevel = chr instanceof CustomMob && level.mobs.contains(chr);
+        CharSpriteFactory spriteFactory = spriteFactoryFrom(actorObj, chr != hero);
+        boolean spriteFactoryChanged = false;
+        if (chr instanceof Mob && spriteFactory != null) {
+            Mob mob = (Mob) chr;
+            spriteFactoryChanged = !spriteFactory.equals(mob.spriteFactory);
+            if (spriteFactoryChanged) {
+                mob.spriteFactory = spriteFactory;
+            }
+        }
         if (!Actor.all().contains(chr)) {
             Actor.add(chr);
         }
         if (chr instanceof CustomMob) {
-            if (!level.mobs.contains(chr)) {
+            if (!wasInLevel) {
                 level.mobs.add((Mob) chr);
                 GameScene.add((Mob) chr);
-            }
-        }
-        if (actorObj.has("position")) {
-            chr.pos = actorObj.getInt("position");
-        }
-        if (hasNotNull(actorObj,"sprite_name"))
-        {
-            //deprecated
-            CharSprite old_sprite = chr.sprite;
-            Class<? extends CharSprite> new_sprite_class;
-            new_sprite_class = spriteClassFromName(JsonStringHelper.getString(actorObj, "sprite_name"), chr != hero);
-            if ((old_sprite == null) || (!old_sprite.getClass().equals(new_sprite_class))) {
-                CharSprite sprite = spriteFromClass(new_sprite_class);
-                //Do we merge HeroSprite and CustomHeroSprite??
-
-                if (sprite instanceof TieredSprite && actorObj.has("tier")) {
-                    ((TieredSprite) sprite).updateTier(actorObj.getInt("tier"));
-                }
-                if (sprite instanceof ClassSprite && actorObj.has("class")) {
-                    HeroClass heroClass = HeroClass.valueOf(JsonStringHelper.getString(actorObj, "class"));
-                    ((ClassSprite) sprite).updateHeroClass(heroClass);
-                }
-                if(!(sprite instanceof HeroSprite)) {
-                    GameScene.updateCharSprite(chr, sprite);
-                }
-            }
-
-
-            //throw new RuntimeException("Deprecated");
-        }
-
-        if (hasNotNull(actorObj,"sprite_asset"))
-        {
-            CharSprite old_sprite = chr.sprite;
-            String spriteAsset = JsonStringHelper.getString(actorObj, "sprite_asset");
-            if ((!(old_sprite instanceof CustomCharSprite)) || (!spriteAsset.equals(((CustomCharSprite) old_sprite).getSpriteAsset()))) {
-                GameScene.updateCharSprite(chr, new CustomCharSprite(spriteAsset));
+            } else if (spriteFactoryChanged && chr.sprite != null) {
+                GameScene.updateCharSprite(chr, spriteFactory);
             }
         }
         for (Iterator<String> it = actorObj.keys(); it.hasNext(); ) {
@@ -196,5 +173,18 @@ public class CharUpdateParser implements ActionParser {
                 }
             }
         }
+    }
+
+    private CharSpriteFactory spriteFactoryFrom(JSONObject actorObj, boolean notHero) throws JSONException {
+        if (hasNotNull(actorObj, "sprite_asset")) {
+            return CharSpriteFactory.forAsset(JsonStringHelper.getString(actorObj, "sprite_asset"));
+        }
+        if (hasNotNull(actorObj, "sprite_name")) {
+            Class<? extends CharSprite> spriteClass = spriteClassFromName(JsonStringHelper.getString(actorObj, "sprite_name"), notHero);
+            Integer tier = actorObj.has("tier") ? actorObj.getInt("tier") : null;
+            HeroClass heroClass = actorObj.has("class") ? HeroClass.valueOf(JsonStringHelper.getString(actorObj, "class")) : null;
+            return CharSpriteFactory.forClass(spriteClass, tier, heroClass);
+        }
+        return null;
     }
 }

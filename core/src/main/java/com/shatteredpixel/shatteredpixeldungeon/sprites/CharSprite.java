@@ -981,13 +981,21 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 	}
 
 	public static CharSprite spriteFromClass(Class<? extends CharSprite> sprite_class) {
+		if (sprite_class == null) {
+			GLog.w("CharSprite.spriteFromClass: sprite class is null. Use MissingSprite default");
+			return new MissingSprite();
+		}
 		CharSprite sprite = null;
 		try {
 			sprite = (CharSprite) sprite_class.newInstance();
 		} catch (Exception e) {
+			GLog.w("CharSprite.spriteFromClass: failed to instantiate %s (%s: %s). Use MissingSprite default",
+					sprite_class.getName(), e.getClass().getSimpleName(), e.getMessage());
 			e.printStackTrace();
 		}
 		if (sprite == null) {
+			GLog.w("CharSprite.spriteFromClass: constructor for %s returned null. Use MissingSprite default",
+					sprite_class.getName());
 			sprite = new MissingSprite();
 		}
 		return sprite;
@@ -1013,7 +1021,8 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 				sprite_class = HeroCustomSprite.class;
 			}
 		} catch (Exception e) {
-			GLog.n("Incorrect sprite \"%s\"", sprite_name);
+			GLog.w("CharSprite.spriteClassFromName: failed to resolve sprite \"%s\" (%s: %s). Sprite factory will use default",
+					sprite_name, e.getClass().getSimpleName(), e.getMessage());
 			e.printStackTrace();
 		}
 		return sprite_class;
