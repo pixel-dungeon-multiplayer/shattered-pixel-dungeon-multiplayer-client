@@ -70,6 +70,10 @@ public class BossHealthBar extends Component {
 
 	public static void parseAction(JSONObject actionObj) {
 		if (actionObj.has("id")) {
+			if (actionObj.isNull("id")) {
+				BossHealthBar.assignBoss(null);
+				return;
+			}
 			int id  = actionObj.getInt("id");
 			Actor actor = Actor.findById(id);
 			if (actor instanceof Mob) {
