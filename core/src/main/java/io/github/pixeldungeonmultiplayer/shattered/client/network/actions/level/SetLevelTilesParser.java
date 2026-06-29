@@ -1,6 +1,7 @@
 package io.github.pixeldungeonmultiplayer.shattered.client.network.actions.level;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.ParseThread;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.utils.TranslationUtils;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.ActionParser;
@@ -23,5 +24,6 @@ public class SetLevelTilesParser implements ActionParser {
                 Dungeon.level.map[i] = map.getInt(i);
             }
         }
+        GameScene.resetMap();
     }
 }
