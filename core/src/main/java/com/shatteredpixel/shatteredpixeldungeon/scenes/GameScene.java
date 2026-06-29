@@ -1038,6 +1038,10 @@ public class GameScene extends PixelScene {
 		if (scene != null) scene.effects.add( effect );
 	}
 
+	public static void effect( Gizmo effect ) {
+		if (scene != null) scene.effects.add( effect );
+	}
+
 	public static void effectOverFog( Visual effect ) {
 		scene.overFogEffects.add( effect );
 	}

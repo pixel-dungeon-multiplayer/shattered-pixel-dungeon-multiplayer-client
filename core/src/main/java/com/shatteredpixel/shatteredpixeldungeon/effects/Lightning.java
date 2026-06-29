@@ -40,6 +40,7 @@ public class Lightning extends Group {
 	private static final float DURATION = 0.3f;
 
 	private float life;
+	private float duration;
 
 	private List<Arc> arcs;
 
@@ -62,6 +63,10 @@ public class Lightning extends Group {
 	}
 
 	public Lightning( List<Arc> arcs, Callback callback ) {
+		this(arcs, callback, DURATION);
+	}
+
+	public Lightning( List<Arc> arcs, Callback callback, float duration ) {
 
 		super();
 
@@ -70,8 +75,9 @@ public class Lightning extends Group {
 			add(arc);
 
 		this.callback = callback;
+		this.duration = duration;
 
-		life = DURATION;
+		life = duration;
 	}
 
 	private static final double A = 180 / Math.PI;
@@ -87,7 +93,7 @@ public class Lightning extends Group {
 
 		} else {
 
-			float alpha = life / DURATION;
+			float alpha = life / duration;
 
 			for (Arc arc : arcs) {
 				arc.alpha(alpha);
