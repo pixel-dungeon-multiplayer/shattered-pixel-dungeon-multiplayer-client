@@ -1,10 +1,7 @@
 package io.github.pixeldungeonmultiplayer.shattered.client.network.actions;
 
-import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Wound;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.JsonStringHelper;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.ParseThread;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.actors.ActorRemoveParser;
@@ -54,21 +51,7 @@ public class DefaultActionParserRegistry {
 
     public static ActionParserRegistry create() {
         ActionParserRegistry registry = new ActionParserRegistry();
-        register(registry, "sprite_action", 1, (parseThread, action) -> {
-            int actorID = action.getInt("actor_id");
-            Actor actor = Actor.findById(actorID);
-            if (actor == null) {
-                GLog.h("solve actor");
-                return;
-            }
-            CharSprite sprite = ((Char) actor).sprite;
-            if (sprite == null) {
-                GLog.h("actor " + actorID + "has null sprite");
-                return;
-            }
-
-            sprite.parseAction(action);
-        });
+        register(registry, "sprite_action", 1, new SpriteActionParser());
         register(registry, "sprite_flash", 1, new SpriteFlashParser());
         register(registry, "show_status", 1, new ShowStatusParser());
         register(registry, "wound_visual", 1, (parseThread, action) -> Wound.hitWithTimeToFade(action.getInt("pos"), (float) action.getDouble("duration")));
