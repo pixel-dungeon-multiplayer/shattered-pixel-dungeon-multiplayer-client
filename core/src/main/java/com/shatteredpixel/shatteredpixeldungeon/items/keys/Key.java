@@ -24,8 +24,6 @@ package com.shatteredpixel.shatteredpixeldungeon.items.keys;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 
 public abstract class Key extends Item {
-
-	public static final float TIME_TO_UNLOCK = 1f;
 	
 	{
 		stackable = true;
@@ -38,12 +36,6 @@ public abstract class Key extends Item {
 	@Override
 	public boolean isSimilar( Item item ) {
 		return super.isSimilar(item) && ((Key)item).depth == depth;
-	}
-
-
-    @Override
-	public boolean isIdentified() {
-		return true;
 	}
 
 }
