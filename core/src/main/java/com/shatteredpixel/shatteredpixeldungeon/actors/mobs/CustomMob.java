@@ -2,7 +2,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 
 
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.RatSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.MissingSprite;
 //FIXME
 public class CustomMob extends Mob {
     @Override
@@ -16,7 +16,7 @@ public class CustomMob extends Mob {
 
     public CustomMob(int id) {
         name = "unknown";
-        spriteClass = RatSprite.class;
+        spriteClass = MissingSprite.class;
 
         HP = HT = 1;
         defenseSkill = 1;

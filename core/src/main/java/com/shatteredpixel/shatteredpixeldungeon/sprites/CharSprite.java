@@ -988,7 +988,7 @@ public class CharSprite extends MovieClip implements Tweener.Listener, MovieClip
 			e.printStackTrace();
 		}
 		if (sprite == null) {
-			sprite = new RatSprite();
+			sprite = new MissingSprite();
 		}
 		return sprite;
 	}

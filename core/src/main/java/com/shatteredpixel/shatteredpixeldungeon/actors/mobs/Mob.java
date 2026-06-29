@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Notes;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.MissingSprite;
 import com.watabou.utils.Reflection;
 
 public abstract class Mob extends Char {
@@ -42,7 +43,8 @@ public abstract class Mob extends Char {
     public int defenseSkill = 0;
 
     public CharSprite sprite() {
-        return Reflection.newInstance(spriteClass);
+        CharSprite sprite = spriteClass == null ? null : Reflection.newInstance(spriteClass);
+        return sprite == null ? new MissingSprite() : sprite;
     }
 
     @Override
@@ -83,4 +85,3 @@ public abstract class Mob extends Char {
         this.desc = desc;
     }
 }
-
