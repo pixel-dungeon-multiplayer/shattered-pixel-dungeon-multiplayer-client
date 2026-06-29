@@ -711,8 +711,13 @@ public class MagicMissile extends Emitter {
 			GLog.n("MagicMissile", e.getMessage());
             //throw new RuntimeException(e);
         }
-    }
+	}
 	public static void show(int type, int from, int to, Group group) {
+		if (group == null)
+		{
+			GLog.n("MagicMissile: group is null");
+			return;
+		}
 		MagicMissile m = (MagicMissile) group.recycle(MagicMissile.class);
 		m.reset(type, from, to, null);
 	}

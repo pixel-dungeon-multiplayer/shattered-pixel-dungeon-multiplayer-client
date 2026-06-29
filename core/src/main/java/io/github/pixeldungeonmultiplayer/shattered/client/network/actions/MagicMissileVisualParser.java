@@ -1,8 +1,7 @@
 package io.github.pixeldungeonmultiplayer.shattered.client.network.actions;
 
-import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.ParseThread;
 import com.watabou.noosa.Group;
 
@@ -15,11 +14,7 @@ public class MagicMissileVisualParser implements ActionParser {
     public void parse(ParseThread parseThread, JSONObject action) throws JSONException {
         int from = action.getInt("from");
         int to = action.getInt("to");
-        Char actor = Actor.findChar(from);
-        Group group = null;
-        if ((actor != null) && (actor.sprite != null)) {
-            group = actor.sprite.parent;
-        }
+        Group group = GameScene.mobSpriteGroup();
         Object type = action.get("type");
         if (type instanceof String) {
             MagicMissile.show((String) type, from, to, group);

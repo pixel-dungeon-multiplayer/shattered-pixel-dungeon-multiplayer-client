@@ -1586,6 +1586,15 @@ public class GameScene extends PixelScene {
 		}
 		return null;
 	}
+
+	@Nullable
+	public static Group mobSpriteGroup(){
+		if (scene != null) {
+			return scene.mobs;
+		}
+		return null;
+	}
+
 	private Group decorEmitters;
 	public void addDecorEmitter(Emitter emitter) {
 		decorEmitters.add(emitter);
