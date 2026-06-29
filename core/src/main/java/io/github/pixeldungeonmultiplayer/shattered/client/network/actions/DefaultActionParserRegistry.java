@@ -1,6 +1,10 @@
 package io.github.pixeldungeonmultiplayer.shattered.client.network.actions;
 
-import com.shatteredpixel.shatteredpixeldungeon.effects.Surprise;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Wound;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.JsonStringHelper;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.ParseThread;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.actors.ActorRemoveParser;
@@ -35,8 +39,6 @@ import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.plants
 import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.plants.PlantUpdateParser;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.traps.TrapRemoveParser;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.traps.TrapUpdateParser;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
-import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.Camera;
 import com.watabou.noosa.audio.Music;
@@ -50,11 +52,25 @@ public class DefaultActionParserRegistry {
 
     public static ActionParserRegistry create() {
         ActionParserRegistry registry = new ActionParserRegistry();
-        register(registry, "sprite_action", 1, new SpriteActionParser());
+        register(registry, "sprite_action", 1, (parseThread, action) -> {
+            int actorID = action.getInt("actor_id");
+            Actor actor = Actor.findById(actorID);
+            if (actor == null) {
+                GLog.h("solve actor");
+                return;
+            }
+            CharSprite sprite = ((Char) actor).sprite;
+            if (sprite == null) {
+                GLog.h("actor " + actorID + "has null sprite");
+                return;
+            }
+
+            sprite.parseAction(action);
+        });
         register(registry, "sprite_flash", 1, new SpriteFlashParser());
         register(registry, "show_status", 1, new ShowStatusParser());
-        register(registry, "wound_visual", 1, new WoundVisualParser());
-        register(registry, "ripple_visual", 1, new RippleVisualParser());
+        register(registry, "wound_visual", 1, (parseThread, action) -> Wound.hitWithTimeToFade(action.getInt("pos"), (float) action.getDouble("duration")));
+        register(registry, "ripple_visual", 1, (parseThread, action) -> GameScene.ripple(action.getInt("pos")));
         register(registry, "missile_sprite_visual", 1, new MissileSpriteVisualParser());
         register(registry, "checked_cell_visual", 1, new CheckedCellVisualParser());
         register(registry, "play_sample", 1, new PlaySampleParser());
@@ -147,32 +163,6 @@ public class DefaultActionParserRegistry {
         return previous;
     }
 
-    private static class SpriteActionParser implements ActionParser {
-        public void parse(ParseThread parseThread, JSONObject action) throws JSONException {
-            parseThread.parseSpriteAction(action);
-        }
-    }
-
-    private static class ShowStatusParser implements ActionParser {
-        public void parse(ParseThread parseThread, JSONObject action) throws JSONException {
-            parseThread.parseShowStatusAction(action);
-        }
-    }
-
-    private static class WoundVisualParser implements ActionParser {
-        public void parse(ParseThread parseThread, JSONObject action) {
-            parseThread.parseWoundVisualAction(action);
-        }
-    }
-
-    private static class RippleVisualParser implements ActionParser {
-        public void parse(ParseThread parseThread, JSONObject action) {
-            parseThread.parseRippleVisualAction(action);
-        }
-    }
-
-
-
     private static class PlaySampleParser implements ActionParser {
         public void parse(ParseThread parseThread, JSONObject action) {
             Sample.INSTANCE.play(action);
@@ -200,42 +190,6 @@ public class DefaultActionParserRegistry {
     private static class ShakeCameraParser implements ActionParser {
         public void parse(ParseThread parseThread, JSONObject action) throws JSONException {
             Camera.main.shake((float) action.getDouble("magnitude"), (float) action.getDouble("duration"));
-        }
-    }
-
-    private static class HeapDropVisualParser implements ActionParser {
-        public void parse(ParseThread parseThread, JSONObject action) throws JSONException {
-            parseThread.parseHeadDropVisualAction(action);
-        }
-    }
-
-    private static class SpellSpriteParser implements ActionParser {
-        public void parse(ParseThread parseThread, JSONObject action) throws JSONException {
-            parseThread.ShowSpellSprite(action);
-        }
-    }
-
-    private static class DiscoverTileParser implements ActionParser {
-        public void parse(ParseThread parseThread, JSONObject action) throws JSONException {
-            GameScene.discoverTile(action.getInt("pos"), action.getInt("old_tile"));
-        }
-    }
-
-    private static class SurpriseVisualParser implements ActionParser {
-        public void parse(ParseThread parseThread, JSONObject action) throws JSONException {
-            Surprise.hit(action.getInt("pos"), action.getInt("angle"));
-        }
-    }
-
-    private static class BossHealthBarParser implements ActionParser {
-        public void parse(ParseThread parseThread, JSONObject action) {
-            BossHealthBar.parseAction(action);
-        }
-    }
-
-    private static class GameSceneFlashParser implements ActionParser {
-        public void parse(ParseThread parseThread, JSONObject action) throws JSONException {
-            GameScene.flash(action.getInt("color"), action.getBoolean("light"));
         }
     }
 
