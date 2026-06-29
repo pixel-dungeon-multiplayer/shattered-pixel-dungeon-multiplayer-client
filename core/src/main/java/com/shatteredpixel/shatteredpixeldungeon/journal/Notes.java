@@ -24,9 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.journal;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
-import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.keys.Key;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -159,80 +157,6 @@ public class Notes {
 			return (obj instanceof LandmarkRecord)
 					&& landmark == ((LandmarkRecord) obj).landmark
 					&& depth() == ((LandmarkRecord) obj).depth();
-		}
-
-	}
-	
-	public static class KeyRecord extends Record {
-		
-		protected Key key;
-		
-		public KeyRecord() {}
-		
-		public KeyRecord( Key key ){
-			this.key = key;
-		}
-		
-		@Override
-		public int depth() {
-			return key.depth;
-		}
-
-		@Override
-		public Image icon() {
-			return new ItemSprite(key);
-		}
-
-		@Override
-		public Visual secondIcon() {
-			if (quantity() > 1){
-				BitmapText text = new BitmapText(Integer.toString(quantity()), PixelScene.pixelFont);
-				text.measure();
-				return text;
-			} else {
-				return null;
-			}
-		}
-
-		@Override
-		public String title() {
-			return key.title();
-		}
-
-		@Override
-		public String desc() {
-			return key.desc();
-		}
-		
-		public Class<? extends Key> type(){
-			return key.getClass();
-		}
-
-		@Override
-		protected int order() {
-			return 1000 + Generator.Category.order(key);
-		}
-
-		public int quantity(){
-			return key.quantity();
-		}
-		
-		public void quantity(int num){
-			key.quantity(num);
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			return (obj instanceof KeyRecord)
-					&& key.isSimilar(((KeyRecord) obj).key);
-		}
-		
-		private static final String KEY	= "key";
-		
-		@Override
-		public void restoreFromBundle(Bundle bundle) {
-			super.restoreFromBundle(bundle);
-			key = (Key) bundle.get(KEY);
 		}
 
 	}
@@ -410,24 +334,8 @@ public class Notes {
 	public static void reset() {
 		records = new ArrayList<>();
 	}
-	
-	private static final String RECORDS	        = "records";
-	private static final String NEXT_CUSTOM_ID	= "next_custom_id";
 
 	protected static int nextCustomID = 0;
-
-	public static void storeInBundle( Bundle bundle ) {
-		bundle.put( RECORDS, records );
-		bundle.put( NEXT_CUSTOM_ID, nextCustomID );
-	}
-	
-	public static void restoreFromBundle( Bundle bundle ) {
-		records = new ArrayList<>();
-		nextCustomID = bundle.getInt( NEXT_CUSTOM_ID );
-		for (Bundlable rec : bundle.getCollection( RECORDS ) ) {
-			records.add( (Record) rec );
-		}
-	}
 
 	public static boolean add( Landmark landmark ) {
 		return add( landmark, Dungeon.depth );
@@ -449,51 +357,6 @@ public class Notes {
 
 	public static boolean contains( Landmark landmark, int depth ){
 		return records.contains(new LandmarkRecord( landmark, depth));
-	}
-
-	public static boolean remove( Landmark landmark ) {
-		return remove( landmark, Dungeon.depth );
-	}
-
-	public static boolean remove( Landmark landmark, int depth ) {
-		return records.remove( new LandmarkRecord(landmark, depth) );
-	}
-	
-	public static boolean add( Key key ){
-		KeyRecord k = new KeyRecord(key);
-		if (!records.contains(k)){
-			boolean result = records.add(k);
-			Collections.sort(records, comparator);
-			return result;
-		} else {
-			k = (KeyRecord) records.get(records.indexOf(k));
-			k.quantity(k.quantity() + key.quantity());
-			return true;
-		}
-	}
-	
-	public static boolean remove( Key key ){
-		KeyRecord k = new KeyRecord( key );
-		if (records.contains(k)){
-
-			k = (KeyRecord) records.get(records.indexOf(k));
-			k.quantity(k.quantity() - key.quantity());
-			if (k.quantity() <= 0){
-				records.remove(k);
-			}
-			return true;
-		}
-		return false;
-	}
-	
-	public static int keyCount( Key key ){
-		KeyRecord k = new KeyRecord( key );
-		if (records.contains(k)){
-			k = (KeyRecord) records.get(records.indexOf(k));
-			return k.quantity();
-		} else {
-			return 0;
-		}
 	}
 
 	public static boolean add( CustomRecord rec ){
