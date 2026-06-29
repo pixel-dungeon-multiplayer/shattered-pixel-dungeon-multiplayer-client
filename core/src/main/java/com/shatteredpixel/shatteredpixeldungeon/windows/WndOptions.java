@@ -21,25 +21,14 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
-import com.shatteredpixel.shatteredpixeldungeon.items.CustomItem;
-import io.github.pixeldungeonmultiplayer.shattered.client.network.JsonStringHelper;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.SendData;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.CustomCharSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.watabou.noosa.Image;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import static io.github.pixeldungeonmultiplayer.shattered.client.network.ParseThread.ToPascalCase;
 
 public class WndOptions extends Window {
 
@@ -132,37 +121,6 @@ public class WndOptions extends Window {
 	public WndOptions(int id, String title, String message, String... options ) {
 		this(title, message, options);
 		this.setId(id);
-	}
-	public WndOptions(int id, JSONObject args) throws JSONException {
-		this.setId(id);
-		Image icon = null;
-		JSONArray optionsArr = args.getJSONArray("options");
-		String[] options = new String[optionsArr.length()];
-		for (int i = 0; i < optionsArr.length(); i += 1) {
-			options[i] = JsonStringHelper.optString(optionsArr, i);
-		}
-		String title = JsonStringHelper.getString(args, "title");
-		int titleColor = args.optInt("title_color", TITLE_COLOR);
-		String text = JsonStringHelper.getString(args, "message");
-		if (args.has("item"))
-		{
-			icon = new ItemSprite(CustomItem.createItem(args.getJSONObject("item")));
-		} else if (args.has("sprite_asset")) {
-			icon = new CustomCharSprite(JsonStringHelper.getString(args, "sprite_asset"));
-		} else if (args.has("sprite_class")) {
-
-			icon = CharSprite.spriteFromClass(
-					CharSprite.spriteClassFromName(
-							ToPascalCase(JsonStringHelper.getString(args, "sprite_class")
-							), true)
-			);
-		}
-		if (args.has("image")) {
-			JSONObject image = args.getJSONObject("image");
-			icon = new Image();
-			icon.fromJson(image);
-		}
-		layoutAll(icon, titleColor, title, text, options);
 	}
 
 	protected void layoutAll(Image icon, Integer titleColor, String title, String message, String... options ){
