@@ -19,6 +19,7 @@ import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.custom
 import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.customtilemap.CustomTilemapRemoveParser;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.customtilemap.CustomTilemapSpecialParser;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.customtilemap.CustomTilemapUpdateParser;
+import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.effects.BeamVisualParser;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.effects.CheckedCellVisualParser;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.effects.EnchantingVisualParser;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.actions.effects.FlareVisualParser;
@@ -89,6 +90,7 @@ public class DefaultActionParserRegistry {
         register(registry, "emitter_stop", 1, new EmitterStopParser());
         register(registry, "heap_drop_visual", 1, new HeapDropVisualParser());
         register(registry, "magic_missile_visual", 1, new MagicMissileVisualParser());
+        register(registry, "beam_visual", 1, new BeamVisualParser());
         register(registry, "spell_sprite", 1, new SpellSpriteParser());
         register(registry, "discover_tile", 1, new DiscoverTileParser());
         register(registry, "surprise_visual", 1, new SurpriseVisualParser());

@@ -38,7 +38,11 @@ public class Beam extends Image {
 	private float timeLeft;
 
 	private Beam(PointF s, PointF e, Effects.Type asset, float duration) {
-		super( Effects.get( asset ) );
+		this(Effects.get(asset), s, e, duration, true);
+	}
+
+	public Beam(Image image, PointF s, PointF e, float duration, boolean playSound) {
+		super(image);
 		
 		origin.set( 0, height / 2 );
 		
@@ -50,7 +54,9 @@ public class Beam extends Image {
 		angle = (float)(Math.atan2( dy, dx ) * A);
 		scale.x = (float)Math.sqrt( dx * dx + dy * dy ) / width;
 		
-		Sample.INSTANCE.play( Assets.Sounds.RAY );
+		if (playSound) {
+			Sample.INSTANCE.play( Assets.Sounds.RAY );
+		}
 		
 		timeLeft = this.duration = duration;
 	}
