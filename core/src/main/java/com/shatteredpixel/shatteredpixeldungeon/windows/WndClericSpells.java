@@ -25,7 +25,6 @@ import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import io.github.pixeldungeonmultiplayer.shattered.client.network.JSONObjectDiff;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.JsonStringHelper;
 import io.github.pixeldungeonmultiplayer.shattered.client.network.SendData;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -52,9 +51,9 @@ public class WndClericSpells extends Window {
 	public static int BTN_SIZE = 20;
 	IconTitle title;
 	ArrayList<IconButton> spellBtns = new ArrayList<>();
-	int id;
+	private int toggleButton;
 	public WndClericSpells(int id, JSONObject object){
-		this.id = id;
+		setId(id);
 		boolean info = object.getBoolean("info");
 		if (!info){
 			title = new IconTitle(new ItemSprite(ItemSpriteSheet.ARTIFACT_TOME), Messages.titleCase(Messages.get(this, "cast_title")));
@@ -66,7 +65,7 @@ public class WndClericSpells extends Window {
 		IconButton btnInfo = new IconButton(info ? new ItemSprite(ItemSpriteSheet.ARTIFACT_TOME) : Icons.INFO.get()){
 			@Override
 			protected void onClick() {
-				SendData.sendWindowResult(getId(),0, new JSONObject().put("toggle_info", true));
+				SendData.sendWindowResult(getId(), toggleButton);
 			}
 		};
 		btnInfo.setRect(WIDTH-16, 0, 16, 16);
@@ -86,6 +85,7 @@ public class WndClericSpells extends Window {
 
 		int top = (int)msg.bottom()+4;
 		JSONArray buttons = object.getJSONArray("buttons");
+		toggleButton = buttons.length();
 		for (int i = 1; i <= Talent.MAX_TALENT_TIERS; i++) {
 			ArrayList<Integer> validIndexes = new ArrayList<>();
 			for (int index = 0; index < buttons.length(); index++) {
@@ -102,7 +102,7 @@ public class WndClericSpells extends Window {
 			}
 			int left = 2 + (WIDTH - validIndexes.size() * (BTN_SIZE + 4)) / 2;
 			for (int spell : validIndexes) {
-				SpellButton spellBtn = new SpellButton(buttons.getJSONObject(spell));
+				SpellButton spellBtn = new SpellButton(spell, buttons.getJSONObject(spell));
 				spellBtn.setRect(left, top, BTN_SIZE, BTN_SIZE);
 				left += spellBtn.width() + 4;
 				add(spellBtn);
@@ -125,16 +125,16 @@ public class WndClericSpells extends Window {
 		boolean info;
 
 		NinePatch bg;
-		int spellID = -1;
+		int buttonIndex = -1;
 		String spellName;
 		String spellShortDesc;
-		public SpellButton(JSONObject object) {
+		public SpellButton(int buttonIndex, JSONObject object) {
 			super(new HeroIcon(object.getInt("icon")));
+			this.buttonIndex = buttonIndex;
 			info = object.getBoolean("info");
 			icon.alpha((float) object.getDouble("alpha"));
 			spellName = JsonStringHelper.getString(object, "spell_name");
 			spellShortDesc = JsonStringHelper.getString(object, "spell_short_desc");
-			spellID = object.getInt("spell_id");
 			bg = Chrome.get(Chrome.Type.TOAST);
 			addToBack(bg);
 		}
@@ -172,10 +172,20 @@ public class WndClericSpells extends Window {
 
 		@Override
 		protected void onClick() {
+			SendData.sendWindowResult(WndClericSpells.this.getId(), buttonIndex);
 			if (!info) {
 				hide();
 			}
-			SendData.sendWindowResult(WndClericSpells.this.id, spellID, new JSONObject().put("action", "click_spell"));
+		}
+
+		@Override
+		protected boolean onLongClick() {
+			if (!info) {
+				SendData.sendWindowResult(WndClericSpells.this.getId(), buttonIndex, new JSONObject().put("is_long_click", true));
+				hide();
+				return true;
+			}
+			return false;
 		}
 		@Override
 		protected String hoverText() {
