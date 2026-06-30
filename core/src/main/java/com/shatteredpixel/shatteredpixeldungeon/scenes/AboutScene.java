@@ -64,6 +64,17 @@ public class AboutScene extends PixelScene {
 		Component content = list.content();
 		content.clear();
 
+		//*** Multiplayer Patch Credits ***
+
+		CreditsBlock multiplayer = new CreditsBlock(true, Window.TITLE_COLOR,
+				"Multiplayer Patch",
+				null,
+				"Developed by: _Nikita22007_, _TextualMold9830_\nBased on Shattered Pixel Dungeon's open source",
+				"github.com/pixel-dungeon-multiplayer",
+				"https://github.com/orgs/pixel-dungeon-multiplayer");
+		multiplayer.setRect((w - colWidth)/2f, insets.top + 6, colWidth, 0);
+		content.add(multiplayer);
+
 		//*** Shattered Pixel Dungeon Credits ***
 
 		CreditsBlock shpx = new CreditsBlock(true, Window.SHPX_COLOR,
@@ -73,9 +84,9 @@ public class AboutScene extends PixelScene {
 				"ShatteredPixel.com",
 				"https://ShatteredPixel.com");
 		if (landscape()){
-			shpx.setRect((w - fullWidth)/2f - 6, insets.top + 10, 120, 0);
+			shpx.setRect((w - fullWidth)/2f - 6, multiplayer.bottom() + 12, 120, 0);
 		} else {
-			shpx.setRect((w - fullWidth)/2f, insets.top + 6, 120, 0);
+			shpx.setRect((w - fullWidth)/2f, multiplayer.bottom() + 12, 120, 0);
 		}
 		content.add(shpx);
 
@@ -92,6 +103,8 @@ public class AboutScene extends PixelScene {
 			alex.setPos(w/2f - colWidth/2f, shpx.bottom()+5);
 		}
 		content.add(alex);
+
+		addLine(Math.min(shpx.top(), alex.top()) - 4, content);
 
 		CreditsBlock celesti = new CreditsBlock(false, Window.SHPX_COLOR,
 				"Sound Effects:",
