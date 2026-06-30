@@ -63,6 +63,7 @@ import java.util.Date;
 public class TitleScene extends PixelScene {
 
 	private Image title;
+	private BitmapText multiplayerPatch;
 	private Fireball leftFB;
 	private Fireball rightFB;
 	private Image signs;
@@ -141,6 +142,19 @@ public class TitleScene extends PixelScene {
 		signs.x = title.x + (title.width() - signs.width())/2f;
 		signs.y = title.y;
 		add( signs );
+
+		multiplayerPatch = new BitmapText( "Multiplayer", pixelFont );
+		multiplayerPatch.measure();
+		float patchScale = Math.min(landscape() ? 2.5f : 2f,
+				Math.min(title.width() * 0.95f, w - 8) / multiplayerPatch.width);
+		multiplayerPatch.scale.set(PixelScene.align(patchScale));
+		multiplayerPatch.hardlight( 0xCCCCCC );
+		multiplayerPatch.x = insets.left + (w - multiplayerPatch.width()) / 2f;
+		multiplayerPatch.y = Math.min(
+				title.y + title.height() + (landscape() ? -2 : 0),
+				insets.top + topRegion - multiplayerPatch.height() - 2);
+		align(multiplayerPatch);
+		add(multiplayerPatch);
 
 		final Chrome.Type GREY_TR = Chrome.Type.GREY_BUTTON_TR;
 		
@@ -309,6 +323,7 @@ public class TitleScene extends PixelScene {
 		float alpha = GameMath.gate(0f, uiAlpha, 1f);
 
 		title.am = alpha;
+		multiplayerPatch.alpha(alpha);
 		leftFB.am = alpha;
 		rightFB.am = alpha;
 		//signs.am = alpha; handles this itself
