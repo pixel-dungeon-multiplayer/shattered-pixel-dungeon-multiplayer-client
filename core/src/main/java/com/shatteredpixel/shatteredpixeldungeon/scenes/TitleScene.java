@@ -172,7 +172,7 @@ public class TitleScene extends PixelScene {
 		add(btnPlay);
 
 		btnSupport = new SupportButton(GREY_TR, Messages.get(this, "support"));
-		add(btnSupport);
+		//add(btnSupport);
 
 		btnRankings = new StyledButton(GREY_TR,Messages.get(this, "rankings")){
 			@Override
@@ -181,7 +181,7 @@ public class TitleScene extends PixelScene {
 			}
 		};
 		btnRankings.icon(Icons.get(Icons.RANKINGS));
-		add(btnRankings);
+		//add(btnRankings);
 		Dungeon.daily = Dungeon.dailyReplay = false;
 
 		btnJournal = new StyledButton(GREY_TR, Messages.get(this, "journal")){
@@ -191,15 +191,15 @@ public class TitleScene extends PixelScene {
 			}
 		};
 		btnJournal.icon(Icons.get(Icons.JOURNAL));
-		add(btnJournal);
+		//add(btnJournal);
 
 		btnNews = new NewsButton(GREY_TR, Messages.get(this, "news"));
 		btnNews.icon(Icons.get(Icons.NEWS));
-		add(btnNews);
+		//add(btnNews);
 
 		btnChanges = new ChangesButton(GREY_TR, Messages.get(this, "changes"));
 		btnChanges.icon(Icons.get(Icons.CHANGES));
-		add(btnChanges);
+		//add(btnChanges);
 
 		btnSettings = new SettingsButton(GREY_TR, Messages.get(this, "settings"));
 		add(btnSettings);
@@ -484,8 +484,8 @@ public class TitleScene extends PixelScene {
 
 		@Override
 		protected void onClick() {
-			//ShatteredPixelDungeon.switchNoFade(SupporterScene.class);
-			addToFront(new WndTitledMessage(Icons.get(Icons.GOLD), "No support yet", "If u want to support us, contact us on Discord"));
+			ShatteredPixelDungeon.switchNoFade(SupporterScene.class);
+			//addToFront(new WndTitledMessage(Icons.get(Icons.GOLD), "No support yet", "If u want to support us, contact us on Discord"));
 		}
 	}
 }
